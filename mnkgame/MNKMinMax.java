@@ -40,7 +40,6 @@ public class MNKMinMax implements MNKPlayer {
 	private static MNKGameState myWin;
 	private static MNKGameState yourWin;
 	private int TIMEOUT;
-	private MNKBoard C;
 
 	/**
 	 * Default empty constructor
@@ -52,7 +51,6 @@ public class MNKMinMax implements MNKPlayer {
 		// New random seed for each game
 		rand    = new Random(System.currentTimeMillis()); 
 		B       = new MNKBoard(M,N,K);
-		C       = new MNKBoard(M,N,K);
 		myWin   = first ? MNKGameState.WINP1 : MNKGameState.WINP2; 
 		yourWin = first ? MNKGameState.WINP2 : MNKGameState.WINP1;
 		TIMEOUT = timeout_in_secs;	
