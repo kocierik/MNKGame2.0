@@ -37,10 +37,9 @@ public class MNKMinMax implements MNKPlayer {
 	private static final MNKGameState OPEN = null;
 	private Random rand;
 	private MNKBoard B;
-	private MNKGameState myWin;
-	private MNKGameState yourWin;
+	private static MNKGameState myWin;
+	private static MNKGameState yourWin;
 	private int TIMEOUT;
-	private int score;
 	private MNKBoard C;
 
 	/**
@@ -69,58 +68,66 @@ public class MNKMinMax implements MNKPlayer {
 	 * </p>
    */
 
-	public MNKBoard unmarkAllCell(MNKBoard board, LinkedList<MNKCell> MC){
-		int count = MC.size();
-		for(int i = 0; i < count; i++){
-			board.unmarkCell();
-		}
-		return board;
-	} 
-
-	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
-		int bestScore = -1000;
-		MNKCell bestMove = new MNKCell(0, 0);
-		for(int k = 0; k < B.FC.size(); k++) {
-			MNKCell d = FC[k];
-			B.markCell(d.i, d.j);
-			int score = minMax(B, 0, false);
-			B = unmarkAllCell(B, B.MC);
-			for (MNKCell cell : MC) {
-				B.markCell(cell.i, cell.j);
-			}
-			if(score > bestScore){
-				bestScore = score;
-				bestMove = new MNKCell(d.i,d.j,MNKCellState.FREE);
-			} 
-		}
-	return bestMove;
+private static int evaluate(MNKBoard board){
+	if(board.gameState == myWin) return 10;
+	else if(board.gameState == yourWin) return -10;
+	else if(board.FC.isEmpty())return 0;
+	else return 0;
 }
 
-	private int minMax(MNKBoard board, int depth, boolean isMaximizing) {
-		if(board.gameState == myWin) return 10;
-		else if(board.gameState == yourWin) return -10;
-		else if(board.FC.isEmpty())return 0;
+static int minimax(MNKBoard board,int depth, int currentPlayer) {
+	int score = evaluate(board);
+  if (score == 10) return score;
+  if (score == -10) return score;
+  if (board.FC.size() == 0) return 0;
+  if (currentPlayer == 0) {
+		int best = -1000;
 
-		if(isMaximizing){
-			int bestScore = -1000;
-			for(MNKCell d : board.FC){
-				board.markCell(d.i, d.j);
-				bestScore = Math.max(bestScore, minMax(board, depth+1, false));
-				if(board.gameState != MNKGameState.OPEN) return bestScore;
-			}
-			return bestScore;
-		} else{
-			int bestScore2 = 1000;
-			for(MNKCell d : board.FC){
-				board.markCell(d.i, d.j);
-				bestScore2 = Math.min(bestScore2, minMax(board, depth+1, true));
-				if(board.gameState != MNKGameState.OPEN) return bestScore2;
-			}
-			return bestScore2;
+		for(int k = 0; k < board.FC.size(); k++) {
+			HashSet<MNKCell> d = board.FC;
+			MNKCell dd = (MNKCell) d.toArray()[k];
+			board.markCell(dd.i, dd.j);
+			best = Math.max(best, minimax(board,depth + 1, currentPlayer+1));
+			board.unmarkCell();
+    }
+    return best;
+  }
+ 
+  else {
+		int best = 1000;
+		for(int k = 0; k < board.FC.size(); k++) {
+			HashSet<MNKCell> d = board.FC;
+			MNKCell dd = (MNKCell) d.toArray()[k];
+			board.markCell(dd.i, dd.j);
+			best = Math.min(best, minimax(board,depth + 1, currentPlayer-1));
+			board.unmarkCell();
 		}
-	}
-	
-	
+		return best;
+  }
+}
+ 
+	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
+    int bestVal = -1000;
+    MNKCell bestMove = new MNKCell(0,0);
+		for (MNKCell cell : MC) {
+			try {
+				B.markCell(cell.i, cell.j);		
+			} catch (Exception e) {}
+		}
+ 
+    for(int k = 0; k < B.FC.size(); k++) {
+			MNKCell d = FC[k];
+			B.markCell(d.i, d.j);
+			int moveVal = minimax(B, 0, B.currentPlayer);
+			B.unmarkCell();
+			if (moveVal > bestVal){
+				bestMove = d;
+				bestVal = moveVal;
+			}
+    }
+    return bestMove;
+}
+
 	public String playerName() {
 		return "AIBest";
 	}
