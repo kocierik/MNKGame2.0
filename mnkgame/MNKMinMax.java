@@ -71,7 +71,6 @@ public class MNKMinMax implements MNKPlayer {
    */
 
 	public double evaluate(MNKBoard B) {
-		//per ora valuto solo lo stato della partita
 		MNKGameState state = B.gameState();
 		
 		if(state == myWin)
@@ -82,7 +81,6 @@ public class MNKMinMax implements MNKPlayer {
 				return 0.1;
 		} else
 				return -1;
-		//potrei valutare il numero di mie pedine di seguito e quelle avversarie per valutare meglio
 }
 
 public double alphabetaPruning(MNKBoard B, boolean myNode, int depth, double alpha, double beta) {
