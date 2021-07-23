@@ -70,68 +70,69 @@ public class MNKMinMax implements MNKPlayer {
 	 * </p>
    */
 
-private static int evaluate(MNKBoard board, int depth){
-	if(board.gameState == myWin) return 10;
-	else if(board.gameState == yourWin)  return -10;
-	else return 0;
+	public double evaluate(MNKBoard B) {
+		MNKGameState state = B.gameState();
+		
+		if(state == myWin)
+				return 1;
+		else if(state == MNKGameState.DRAW)
+				return 0;
+		else if(state == MNKGameState.OPEN) {
+				return 0.1;
+		} else
+				return -1;
 }
 
-static int minimax(MNKBoard board,int depth, int currentPlayer, int a, int b) {
-	int score = evaluate(board,depth);
-  if (score == 10)return score-depth;
-  if (score == -10)return score+depth;
-  if (currentPlayer == 0) {
-	for(int k = 0; k < board.FC.size(); k++) {
-		HashSet<MNKCell> d = board.FC;
-		MNKCell dd = (MNKCell) d.toArray()[k];
-		board.markCell(dd.i, dd.j);
-		a = Math.max(a, minimax(board,depth + 1, currentPlayer+1,a,b));
-		board.unmarkCell();									// Unmark the last marked cell!
-		if(a>=b){ 
-			return a;
-		}	
-	}
-	return a;
-  }
-  else {
-		for(int k = 0; k < board.FC.size(); k++) {
-			HashSet<MNKCell> d = board.FC;
-			MNKCell dd = (MNKCell) d.toArray()[k];
-			board.markCell(dd.i, dd.j);
-			b = Math.min(b, minimax(board,depth + 1, currentPlayer-1,a,b));
-			board.unmarkCell();
-			if(b<=a){ 
-				return b;
+public double alphabetaPruning(MNKBoard B, boolean myNode, int depth, double alpha, double beta) {
+	double eval;
+	MNKCell FC [] = B.getFreeCells();
+	if (depth == 0 || B.gameState != MNKGameState.OPEN) {
+			return evaluate(B);
+	} else if(myNode) {
+			eval = 10;
+			for(MNKCell c : FC) {
+					B.markCell(c.i, c.j);
+					eval = Math.min(eval, alphabetaPruning(B,false,depth-1,alpha,beta));
+					beta = Math.min(eval, beta);
+					B.unmarkCell();
+					if(beta <= alpha)
+							break;
 			}
-		}
-		return b;
-  }
+			return eval;
+	} else {
+			eval = -10;
+			for(MNKCell c : FC) {
+					B.markCell(c.i, c.j);
+					eval = Math.max(eval, alphabetaPruning(B,true,depth-1,alpha,beta));
+					alpha = Math.max(eval, alpha);
+					B.unmarkCell();
+					if(beta <= alpha)
+							break;
+			}
+			return eval;
+	}
 }
  
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
-	// MNKMagicSquare.generateSquare(3);
 	System.out.println("-----------------------------------------------");
-	int bestVal = -1000;
-	int a = -1000;
-	int b = 1000;
-	MNKCell bestMove = new MNKCell(0,0);
-
-	for (MNKCell cell : MC) {
-		try {
-			B.markCell(cell.i, cell.j);		// mark the marked cell!
-		} catch (Exception e) {}
+	if(MC.length > 0) {
+		MNKCell c = MC[MC.length-1]; 
+		B.markCell(c.i,c.j);         
 	}
-	for(int k = 0; k < B.FC.size(); k++) {
-		MNKCell d = FC[k];															// this is singol cell!
-		B.markCell(d.i, d.j);														// B is a board!
-		int moveVal = minimax(B, 0, B.currentPlayer,a,b);
-		System.out.println("SELECTCELL --> riga = "+ d.i + ", colonna = " + d.j + "  | MOVEVAL ---> " + moveVal);
+	double bestScore = -1000;
+	double score;
+	MNKCell bestMove = new MNKCell(1,1);
+	for(MNKCell d : FC) {
+		B.markCell(d.i, d.j);														
+		score = alphabetaPruning(B, true,30,-10,10);
 		B.unmarkCell();
-		if (moveVal > bestVal){
+		 System.out.println("SELECTCELL --> riga = "+ d.i + ", colonna = " + d.j + "  | MOVEVAL ---> " + score);
+		if (score > bestScore){
+			bestScore = score;
 			bestMove = d;
-			bestVal = moveVal;
 		}
 	}
+	B.markCell(bestMove.i, bestMove.j);
 	return bestMove;
 }
 

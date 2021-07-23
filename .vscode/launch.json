@@ -9,7 +9,7 @@
       "name": "Launch MNKGame",
       "request": "launch",
       "mainClass": "mnkgame.MNKGame",
-      "projectName": "MNKGame2.0_8af27798",
+      "projectName": "MNKGame2.0_7ad60b8b",
       "args": [3,3,3, "mnkgame.MNKMinMax"],
     }
   ]

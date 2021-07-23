@@ -6,23 +6,11 @@
   "configurations": [
     {
       "type": "java",
-      "name": "Launch Current File",
-      "request": "launch",
-      "mainClass": "${file}"
-    },
-    {
-      "type": "java",
       "name": "Launch MNKGame",
       "request": "launch",
       "mainClass": "mnkgame.MNKGame",
-      "projectName": "MNKGame2.0_8af27798",
-    },
-    {
-      "type": "java",
-      "name": "Launch MNKPlayerTester",
-      "request": "launch",
-      "mainClass": "MNKPlayerTester",
-      "projectName": "mnkgame_ab550a65"
-    }z
+      "projectName": "MNKGame2.0_7ad60b8b",
+      "args": [3,3,3, "mnkgame.MNKMinMax"],
+    }
   ]
 }
