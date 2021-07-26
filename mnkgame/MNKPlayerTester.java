@@ -50,7 +50,7 @@ import java.util.concurrent.Callable;
  * </p>
  */
 public class MNKPlayerTester {
-	private static int     TIMEOUT = 10;
+	private static int     TIMEOUT = 100;
 	private static int     ROUNDS  = 1;
 	private static boolean VERBOSE = false;
 

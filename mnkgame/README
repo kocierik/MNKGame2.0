@@ -7,26 +7,26 @@ MNKGame application:
 
 - Human vs Computer.  In the mnkgame/ directory run:
 	
-		java -cp ".." mnkgame.MNKGame 3 3 3 mnkgame.RandomPlayer
+		java -cp ".." mnkgame.MNKGame 3 3 3 mnkgame.S
 
 
 - Computer vs Computer. In the mnkgame/ directory run:
 
-		java -cp ".." mnkgame.MNKGame 5 5 4 mnkgame.RandomPlayer mnkgame.QuasiRandomPlayer
+		java -cp ".." mnkgame.MNKGame 3 3 3 mnkgame.S mnkgame.QuasiRandomPlayer
 
 
 MNKPlayerTester application:
 
 - Output score only:
 
-	java -cp ".." mnkgame.MNKPlayerTester 5 5 4 mnkgame.RandomPlayer mnkgame.QuasiRandomPlayer
+	java -cp ".." mnkgame.MNKPlayerTester 3 3 3 mnkgame.S mnkgame.QuasiRandomPlayer
 
 - Verbose output
 
-	java -cp ".." mnkgame.MNKPlayerTester 5 5 4 mnkgame.RandomPlayer mnkgame.QuasiRandomPlayer -v
+	java -cp ".." mnkgame.MNKPlayerTester 3 3 3 mnkgame.S mnkgame.QuasiRandomPlayer -v
 
 
 - Verbose output and customized timeout (1 sec) and number of game repetitions (10 rounds)
 
 
-	java -cp ".." mnkgame.MNKPlayerTester 5 5 4 mnkgame.RandomPlayer mnkgame.QuasiRandomPlayer -v -t 1 -r 10
+	java -cp ".." mnkgame.MNKPlayerTester 3 3 3 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 10

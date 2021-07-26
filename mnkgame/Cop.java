@@ -30,6 +30,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import mnkgame.ReadingReturnValueTask;
 import mnkgame.MNKBoard;
 
 /**
@@ -37,7 +39,7 @@ import mnkgame.MNKBoard;
  * <p> It can detect a single-move win or loss. In all the other cases behaves randomly.
  * </p> 
  */
-public class MNKMinMax implements MNKPlayer {
+public class Cop extends Thread implements MNKPlayer  {
 	private static final MNKGameState OPEN = null;
 	private Random rand;
 	private MNKBoard B;
@@ -48,7 +50,7 @@ public class MNKMinMax implements MNKPlayer {
 	/**
 	 * Default empty constructor
 	 */
-	public MNKMinMax() {}
+	public Cop() {}
 
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
@@ -70,33 +72,28 @@ public class MNKMinMax implements MNKPlayer {
 	 * </p>
    */
 
-	public double evaluate(MNKBoard B) {
+	public double evaluate(MNKBoard B, int depth) {
 		MNKGameState state = B.gameState();
-		
-		if(state == myWin)
-				return 1;
-		else if(state == MNKGameState.DRAW)
-				return 0;
-		else if(state == MNKGameState.OPEN) {
-				return 0.1;
-		} else
-				return -1;
+		if(state == myWin) return 10;
+		else if(state == MNKGameState.DRAW) return 0;
+		else if(state == yourWin) return -10;
+		return 0;
 }
 
 public double alphabetaPruning(MNKBoard B, boolean myNode, int depth, double alpha, double beta) {
 	double eval;
 	MNKCell FC [] = B.getFreeCells();
 	if (depth == 0 || B.gameState != MNKGameState.OPEN) {
-			return evaluate(B);
+			return evaluate(B,depth);
 	} else if(myNode) {
 			eval = 10;
 			for(MNKCell c : FC) {
-					B.markCell(c.i, c.j);
-					eval = Math.min(eval, alphabetaPruning(B,false,depth-1,alpha,beta));
-					beta = Math.min(eval, beta);
-					B.unmarkCell();
-					if(beta <= alpha)
-							break;
+				B.markCell(c.i, c.j);
+				eval = Math.min(eval, alphabetaPruning(B,false,depth-1,alpha,beta));
+				beta = Math.min(eval, beta);
+				B.unmarkCell();
+				if(beta <= alpha)
+						break;
 			}
 			return eval;
 	} else {
@@ -113,30 +110,54 @@ public double alphabetaPruning(MNKBoard B, boolean myNode, int depth, double alp
 	}
 }
  
+
+// public void run(){  
+// 	System.out.println("thread is running " + Thread.currentThread().getName());  	
+// }
+
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
 	System.out.println("-----------------------------------------------");
 	if(MC.length > 0) {
 		MNKCell c = MC[MC.length-1]; 
 		B.markCell(c.i,c.j);         
 	}
+	if(MC.length == 0){
+		B.markCell(1,1);
+		MC = B.getMarkedCells();
+		return MC[0];
+	} 
+
+		ReadingReturnValueTask readTask1 = new ReadingReturnValueTask(B, true,3,-10,10);
+		Thread runnableThread1 = new Thread(readTask1);
+		runnableThread1.setName("readTask1");
+		runnableThread1.start();
+		try {
+		System.out.println(runnableThread1.getName() + " : have no of lines " + readTask1.numberLines());
+	} catch (Exception e) {}
+
+	
 	double bestScore = -1000;
 	double score;
 	MNKCell bestMove = new MNKCell(1,1);
 	for(MNKCell d : FC) {
 		B.markCell(d.i, d.j);														
-		score = alphabetaPruning(B, true,30,-10,10);
+		score = alphabetaPruning(B, true,4,-10,10);
 		B.unmarkCell();
-		 System.out.println("SELECTCELL --> riga = "+ d.i + ", colonna = " + d.j + "  | MOVEVAL ---> " + score);
 		if (score > bestScore){
 			bestScore = score;
 			bestMove = d;
 		}
 	}
 	B.markCell(bestMove.i, bestMove.j);
+	System.out.println("SELECTCELL --> riga = " + bestMove.i + ", colonna = " + bestMove.j + "  | MOVEVAL ---> " + bestScore );
 	return bestMove;
 }
 
 	public String playerName() {
 		return "AIBest";
 	}
+
 }
+
+
+
