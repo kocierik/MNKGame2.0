@@ -213,34 +213,27 @@ public class Solution implements MNKPlayer {
 		if(FC.length == 1) return FC[0];
 		
         // If board is clear, then im first, return right corner of the board
-        if(MC.length == 0){
-            B.markCell(0,0);
-            MC = B.getMarkedCells();
-            return MC[0];
-        }
-        
+        // if(MC.length == 0){
+        //     B.markCell(0,0);
+        //     MC = B.getMarkedCells();
+        //     return MC[0];
+        // }
         MNKCell[] interestingFC = removeUslessCell(B);
         double value, max = -10;
         for(MNKCell A : interestingFC) {
             if ((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
-                //System.out.println("Il tempo e' finito");
                 break;
             } else {
                 B.markCell(A.i,A.j);
-                //System.out.print("Controllo la mossa " + A);
-                value = alphabetaPruning(B,true,4,-10,10); //dovrebbe essere false?
+                value = alphabetaPruning(B,true,6,-10,10); //dovrebbe essere false?
                 B.unmarkCell();
-                //System.out.println("    Valutata: "+ value);
                 if (value > max) {
                     max = value;
                     selected = A;
-                    //System.out.println("Era meglio della mossa di prima perche' vale: " + tmp);
                 }
             }
         }
-
         B.markCell(selected.i,selected.j);
-        //System.out.println("Alla fine ho selezionato " + selected);
         return selected;
 	}
 

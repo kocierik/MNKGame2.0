@@ -21,6 +21,20 @@ MNKPlayerTester application:
 
 	java -cp ".." mnkgame.MNKPlayerTester 3 3 3 mnkgame.S mnkgame.QuasiRandomPlayer
 
+- Output score repetitions:
+	java -cp ".." mnkgame.MNKPlayerTester 3 3 3 mnkgame.S mnkgame.QuasiRandomPlayer -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 4 3 3 mnkgame.S mnkgame.QuasiRandomPlayer -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 4 4 3 mnkgame.S mnkgame.QuasiRandomPlayer -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 4 4 4 mnkgame.S mnkgame.QuasiRandomPlayer -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 5 4 4 mnkgame.S mnkgame.QuasiRandomPlayer -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 5 5 4 mnkgame.S mnkgame.QuasiRandomPlayer -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 5 5 5 mnkgame.S mnkgame.QuasiRandomPlayer -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 6 4 4 mnkgame.S mnkgame.QuasiRandomPlayer -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 6 5 4 mnkgame.S mnkgame.QuasiRandomPlayer -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 6 6 4 mnkgame.S mnkgame.QuasiRandomPlayer -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 6 6 5 mnkgame.S mnkgame.QuasiRandomPlayer -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 6 6 6 mnkgame.S mnkgame.QuasiRandomPlayer -r 2
+
 - Verbose output
 
 	java -cp ".." mnkgame.MNKPlayerTester 3 3 3 mnkgame.S mnkgame.QuasiRandomPlayer -v
@@ -29,4 +43,24 @@ MNKPlayerTester application:
 - Verbose output and customized timeout (1 sec) and number of game repetitions (10 rounds)
 
 
-	java -cp ".." mnkgame.MNKPlayerTester 3 3 3 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 10
+	java -cp ".." mnkgame.MNKPlayerTester 3 3 3 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 4 3 3 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 4 4 3 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 4 4 4 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 5 4 4 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 5 5 5 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 4 4 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 5 4 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 6 4 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 6 5 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 6 6 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 4 4 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 5 4 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 6 4 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 7 4 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+
+	java -cp ".." mnkgame.MNKPlayerTester 7 5 5 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 6 5 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 7 5 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 7 6 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 7 7 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
