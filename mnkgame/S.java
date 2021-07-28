@@ -190,11 +190,8 @@ public MNKCell getRandomUsefullCell(MNKBoard B) {
 	return FC[0];
 }
 
-
-
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
 		count++;
-		System.out.println(count);
 		start = System.currentTimeMillis();
 		MNKCell selected = getRandomUsefullCell(B);
 
@@ -202,11 +199,13 @@ public MNKCell getRandomUsefullCell(MNKBoard B) {
 			MNKCell c = MC[MC.length-1]; 
 			B.markCell(c.i,c.j);         
 		}
+
 		if(MC.length == 0){
 			B.markCell(B.M/2,B.N/2);
 			MC = B.getMarkedCells();
 			return MC[0];
 		} 
+
 
 		for(MNKCell d : FC) {
 			if(B.markCell(d.i,d.j) == myWin) {
@@ -229,6 +228,33 @@ public MNKCell getRandomUsefullCell(MNKBoard B) {
 				}
 		}
 
+		int pos   = rand.nextInt(FC.length); 
+		MNKCell p = FC[pos]; // random move
+		B.markCell(p.i,p.j); // mark the random position	
+		for(int k = 0; k < FC.length; k++) {
+			// If time is running out, return the randomly selected  cell
+      if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
+				return p;
+			} else if(k != pos) {     
+				MNKCell q = FC[k];
+				if(B.markCell(q.i,q.j) == yourWin) {
+					B.unmarkCell();        // undo adversary move
+					B.unmarkCell();	       // undo my move
+					B.markCell(q.i,q.j);   // select his winning position
+					return q;							 // return his winning position
+				} else {
+					B.unmarkCell();	       // undo adversary move to try a new one
+				}	
+			}	
+		}
+		B.unmarkCell();	       // undo my move
+
+
+
+
+
+
+
 		MNKCell[] interestingFC = removeUslessCell(B);
 		double score, bestScore = -10;
 		for(MNKCell d : interestingFC) {
@@ -236,8 +262,8 @@ public MNKCell getRandomUsefullCell(MNKBoard B) {
 				break;
 			} else {
 				B.markCell(d.i, d.j);		
-				if(count < 4) score = alphabetaPruning(B, true,6,-10,10);
-				else score = alphabetaPruning(B, true,6,-10,10);
+				if(B.M <= 6) score = alphabetaPruning(B, true,6,-10,10);
+				else score = alphabetaPruning(B, true,4,-10,10);
 				B.unmarkCell();
 				if (score > bestScore){
 					bestScore = score;

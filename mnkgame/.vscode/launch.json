@@ -6,11 +6,9 @@
   "configurations": [
     {
       "type": "java",
-      "name": "Launch MNKGame",
+      "name": "Launch Java Program",
       "request": "launch",
-      "mainClass": "mnkgame.MNKGame",
-      "projectName": "MNKGame2.0_7ad60b8b",
-      "args": [3,3,3, "mnkgame.S"],
-    }
+      "mainClass": "mnkgame.MNKGame"
+    },
   ]
 }

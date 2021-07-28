@@ -64,3 +64,4 @@ MNKPlayerTester application:
 	java -cp ".." mnkgame.MNKPlayerTester 7 7 5 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
 	java -cp ".." mnkgame.MNKPlayerTester 7 7 6 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
 	java -cp ".." mnkgame.MNKPlayerTester 7 7 7 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 8 8 4 mnkgame.S mnkgame.QuasiRandomPlayer -v -t 1 -r 5
