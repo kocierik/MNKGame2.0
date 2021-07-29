@@ -263,6 +263,7 @@ public MNKCell getRandomUsefullCell(MNKBoard B) {
 			} else {
 				B.markCell(d.i, d.j);		
 				if(B.M <= 6) score = alphabetaPruning(B, true,6,-10,10);
+				// else if(B.M < 7) score = alphabetaPruning(B, true,5,-10,10);
 				else score = alphabetaPruning(B, true,4,-10,10);
 				B.unmarkCell();
 				if (score > bestScore){
