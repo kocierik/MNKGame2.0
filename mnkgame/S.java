@@ -86,44 +86,42 @@ public class S implements MNKPlayer {
 				return -1;
 }
 
-public double alphabetaPruning(MNKBoard B, boolean myNode, int depth, double alpha, double beta) {
-	double eval;
-	MNKCell FC [] = B.getFreeCells();
-	if (depth == 0 || B.gameState != MNKGameState.OPEN || (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(98.0/100.0)) {
+public double alphabetaPruning(MNKBoard B, boolean isMaximizing, int depth, double alpha, double beta) {
+	double best;
+	MNKCell FC[] = B.getFreeCells();
+	if (depth == 0 || B.gameState != MNKGameState.OPEN || (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
 			return evaluate(B);
-	} else if(myNode) {
-			eval = 10;
-			for(MNKCell c : FC) {
-					B.markCell(c.i, c.j);
-					eval = Math.min(eval, alphabetaPruning(B,false,depth-1,alpha,beta));
-					beta = Math.min(eval, beta);
+	} else if(isMaximizing) {
+			best = 10;
+			for(MNKCell d : FC) {
+					B.markCell(d.i, d.j);
+					best = Math.min(best, alphabetaPruning(B,false,depth-1,alpha,beta));
+					beta = Math.min(best, beta);
 					B.unmarkCell();
-					if(beta <= alpha)
-							break;
+					if(alpha >= beta) break;
 			}
-			return eval;
+			return best;
 	} else {
-			eval = -10;
-			for(MNKCell c : FC) {
-					B.markCell(c.i, c.j);
-					eval = Math.max(eval, alphabetaPruning(B,true,depth-1,alpha,beta));
-					alpha = Math.max(eval, alpha);
+			best = -10;
+			for(MNKCell d : FC) {
+					B.markCell(d.i, d.j);
+					best = Math.max(best, alphabetaPruning(B,true,depth-1,alpha,beta));
+					alpha = Math.max(best, alpha);
 					B.unmarkCell();
-					if(beta <= alpha)
-							break;
+					if(alpha >= beta) break;
 			}
-			return eval;
+			return best;
 	}
 }
 
-public MNKCell[] removeUslessCell(MNKBoard B) {
-	int i, j;
+public MNKCell[] removeBadMoves(MNKBoard B) {
 	Set<MNKCell> FC = new HashSet<MNKCell>();
 	MNKCell[] MC = B.getMarkedCells();
+	int i, j;
 
-	for(MNKCell m : MC) {
-			i = m.i;
-			j = m.j;
+	for(MNKCell d : MC){
+			i = d.i;
+			j = d.j;
 			for(int w = 1; w < B.K; w++) {
 					if(i-w >= 0)
 							if(B.cellState(i-w,j) == MNKCellState.FREE)
@@ -155,49 +153,48 @@ public MNKCell[] removeUslessCell(MNKBoard B) {
 	return FC.toArray(tmpFC);
 }
 
-public MNKCell getRandomUsefullCell(MNKBoard B) {
+public MNKCell getBestMoves(MNKBoard B) {
 	int i, j;
 	MNKCell[] FC = B.getFreeCells();
 
-	for(MNKCell f : FC) {
-			i = f.i;
-			j = f.j;
+	for(MNKCell d : FC) {
+			i = d.i;
+			j = d.j;
 			if (i+1 < B.M)
 					if(B.cellState(i+1,j) != MNKCellState.FREE)
-							return f;
+							return d;
 			if (i-1 >= 0)
 					if(B.cellState(i-1,j) != MNKCellState.FREE)
-							return f;
+							return d;
 			if (j+1 < B.N)
 					if(B.cellState(i,j+1) != MNKCellState.FREE)
-							return f;
+							return d;
 			if (j-1 >= 0)
 					if(B.cellState(i,j-1) != MNKCellState.FREE)
-							return f;
+							return d;
 			if (i+1 < B.M && j+1 < B.N)
 					if(B.cellState(i+1,j+1) != MNKCellState.FREE)
-							return f;
+							return d;
 			if (i+1 < B.M && j-1 >= 0)
 					if(B.cellState(i+1,j-1) != MNKCellState.FREE)
-							return f;
+							return d;
 			if (i-1 >= 0 && j+1 < B.N)
 					if(B.cellState(i-1,j+1) != MNKCellState.FREE)
-							return f;
+							return d;
 			if (i-1 >= 0 && j-1 >= 0)
 					if(B.cellState(i-1,j-1) != MNKCellState.FREE)
-							return f;
+							return d;
 	}
 	return FC[0];
 }
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
-		count++;
 		start = System.currentTimeMillis();
-		MNKCell selected = getRandomUsefullCell(B);
+		MNKCell bestMoves = getBestMoves(B);
 
 		if(MC.length > 0) {
-			MNKCell c = MC[MC.length-1]; 
-			B.markCell(c.i,c.j);         
+			MNKCell d = MC[MC.length-1]; 
+			B.markCell(d.i,d.j);         
 		}
 
 		if(MC.length == 0){
@@ -217,63 +214,58 @@ public MNKCell getRandomUsefullCell(MNKBoard B) {
 
 		if(MC.length == 1){
 			if(MNKCellState.FREE == B.cellState(B.M/2,B.N/2)){
-				MNKCell c = new MNKCell(B.M/2,B.N/2);
+				MNKCell d = new MNKCell(B.M/2,B.N/2);
 				B.markCell(B.M/2,B.N/2);
-				return c;
+				return d;
 			} 
 			else {
-					MNKCell c = new MNKCell(B.M/2-1,B.N/2-1);
+					MNKCell d = new MNKCell(B.M/2-1,B.N/2-1);
 					B.markCell(B.M/2-1,B.N/2-1);
-					return c;
+					return d;
 				}
 		}
 
-		int pos   = rand.nextInt(FC.length); 
-		MNKCell p = FC[pos]; // random move
-		B.markCell(p.i,p.j); // mark the random position	
+		int pos = rand.nextInt(FC.length); 
+		MNKCell p = FC[pos]; 
+		B.markCell(p.i,p.j); 
 		for(int k = 0; k < FC.length; k++) {
-			// If time is running out, return the randomly selected  cell
       if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
 				return p;
 			} else if(k != pos) {     
 				MNKCell q = FC[k];
 				if(B.markCell(q.i,q.j) == yourWin) {
-					B.unmarkCell();        // undo adversary move
-					B.unmarkCell();	       // undo my move
-					B.markCell(q.i,q.j);   // select his winning position
-					return q;							 // return his winning position
+					B.unmarkCell();        
+					B.unmarkCell();	       
+					B.markCell(q.i,q.j);   
+					return q;							 
 				} else {
-					B.unmarkCell();	       // undo adversary move to try a new one
+					B.unmarkCell();	       
 				}	
 			}	
 		}
-		B.unmarkCell();	       // undo my move
+		B.unmarkCell();	      
 
-
-
-
-
-
-
-		MNKCell[] interestingFC = removeUslessCell(B);
-		double score, bestScore = -10;
-		for(MNKCell d : interestingFC) {
+		MNKCell[] goodMoves = removeBadMoves(B);
+		double score;
+		double bestScore = -10;
+		for(MNKCell d : goodMoves) {
 			if ((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
 				break;
 			} else {
 				B.markCell(d.i, d.j);		
-				if(B.M <= 6) score = alphabetaPruning(B, true,6,-10,10);
+				if(B.M <= 6) score = alphabetaPruning(B, true,7,-10,10);
 				// else if(B.M < 7) score = alphabetaPruning(B, true,5,-10,10);
-				else score = alphabetaPruning(B, true,4,-10,10);
+				else if(B.M <= 10) score = alphabetaPruning(B, true,4,-10,10);
+				else score = alphabetaPruning(B, true,1,-10,10);
 				B.unmarkCell();
 				if (score > bestScore){
 					bestScore = score;
-					selected = d;
+					bestMoves = d;
 				} 
 			}
 		} 
-		B.markCell(selected.i, selected.j);
-			return selected;
+		B.markCell(bestMoves.i, bestMoves.j);
+		return bestMoves;
 	}
 
 		public String playerName() {
