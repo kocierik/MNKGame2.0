@@ -75,15 +75,10 @@ public class S implements MNKPlayer {
 
 	public double evaluate(MNKBoard B) {
 		MNKGameState state = B.gameState();
-		
-		if(state == myWin)
-				return 1;
-		else if(state == MNKGameState.DRAW)
-				return 0;
-		else if(state == MNKGameState.OPEN) {
-				return 0.1;
-		} else
-				return -1;
+		if(state == myWin) return 1;
+		else if(state == MNKGameState.DRAW) return 0;
+		else if(state == MNKGameState.OPEN) return 0.1;
+	  else return -1;
 }
 
 public double alphabetaPruning(MNKBoard B, boolean isMaximizing, int depth, double alpha, double beta) {
@@ -116,38 +111,22 @@ public double alphabetaPruning(MNKBoard B, boolean isMaximizing, int depth, doub
 
 public MNKCell[] removeBadMoves(MNKBoard B) {
 	Set<MNKCell> FC = new HashSet<MNKCell>();
-	MNKCell[] MC = B.getMarkedCells();
+	// MNKCell[] MC = B.getMarkedCells();
 	int i, j;
 
-	for(MNKCell d : MC){
-			i = d.i;
-			j = d.j;
-			for(int w = 1; w < B.K; w++) {
-					if(i-w >= 0)
-							if(B.cellState(i-w,j) == MNKCellState.FREE)
-									FC.add(new MNKCell(i-w,j));
-					if(j-w >= 0)
-							if(B.cellState(i,j-w) == MNKCellState.FREE)
-									FC.add(new MNKCell(i,j-w));
-					if(i+w < B.M)
-							if(B.cellState(i+w,j) == MNKCellState.FREE)
-									FC.add(new MNKCell(i+w,j));
-					if(j+w < B.N)
-							if(B.cellState(i,j+w) == MNKCellState.FREE)
-									FC.add(new MNKCell(i,j+w));
-					if(i+w < B.M && j+w < B.N)
-							if(B.cellState(i+w,j+w) == MNKCellState.FREE)
-									FC.add(new MNKCell(i+w,j+w));
-					if(i+w < B.M && j-w >= 0)
-							if(B.cellState(i+w,j-w) == MNKCellState.FREE)
-									FC.add(new MNKCell(i+w,j-w));
-					if(i-w >= 0 && j+w < B.N)
-							if(B.cellState(i-w,j+w) == MNKCellState.FREE)
-									FC.add(new MNKCell(i-w,j+w));
-					if(i-w >= 0 && j-w >= 0)
-							if(B.cellState(i-w,j-w) == MNKCellState.FREE)
-									FC.add(new MNKCell(i-w,j-w));
-			}
+	for(MNKCell d : B.getMarkedCells()){
+		i = d.i;
+		j = d.j;
+		for(int k = 1; k < B.K; k++) {
+			if(i-k >= 0 && B.cellState(i-k,j) == MNKCellState.FREE) FC.add(new MNKCell(i-k,j));
+			if(j-k >= 0 && B.cellState(i,j-k) == MNKCellState.FREE) FC.add(new MNKCell(i,j-k));
+			if(i+k < B.M && B.cellState(i+k,j) == MNKCellState.FREE) FC.add(new MNKCell(i+k,j));
+			if(j+k < B.N && B.cellState(i,j+k) == MNKCellState.FREE) FC.add(new MNKCell(i,j+k));
+			if(i+k < B.M && j+k < B.N && B.cellState(i+k,j+k) == MNKCellState.FREE) FC.add(new MNKCell(i+k,j+k));
+			if(i+k < B.M && j-k >= 0 && B.cellState(i+k,j-k) == MNKCellState.FREE) FC.add(new MNKCell(i+k,j-k));
+			if(i-k >= 0 && j+k < B.N && B.cellState(i-k,j+k) == MNKCellState.FREE) FC.add(new MNKCell(i-k,j+k));
+			if(i-k >= 0 && j-k >= 0 && B.cellState(i-k,j-k) == MNKCellState.FREE) FC.add(new MNKCell(i-k,j-k));
+		}
 	}
 	MNKCell[] tmpFC = new MNKCell[FC.size()];
 	return FC.toArray(tmpFC);
@@ -155,37 +134,20 @@ public MNKCell[] removeBadMoves(MNKBoard B) {
 
 public MNKCell getBestMoves(MNKBoard B) {
 	int i, j;
-	MNKCell[] FC = B.getFreeCells();
-
-	for(MNKCell d : FC) {
-			i = d.i;
-			j = d.j;
-			if (i+1 < B.M)
-					if(B.cellState(i+1,j) != MNKCellState.FREE)
-							return d;
-			if (i-1 >= 0)
-					if(B.cellState(i-1,j) != MNKCellState.FREE)
-							return d;
-			if (j+1 < B.N)
-					if(B.cellState(i,j+1) != MNKCellState.FREE)
-							return d;
-			if (j-1 >= 0)
-					if(B.cellState(i,j-1) != MNKCellState.FREE)
-							return d;
-			if (i+1 < B.M && j+1 < B.N)
-					if(B.cellState(i+1,j+1) != MNKCellState.FREE)
-							return d;
-			if (i+1 < B.M && j-1 >= 0)
-					if(B.cellState(i+1,j-1) != MNKCellState.FREE)
-							return d;
-			if (i-1 >= 0 && j+1 < B.N)
-					if(B.cellState(i-1,j+1) != MNKCellState.FREE)
-							return d;
-			if (i-1 >= 0 && j-1 >= 0)
-					if(B.cellState(i-1,j-1) != MNKCellState.FREE)
-							return d;
+	// MNKCell[] FC = B.getFreeCells();
+	for(MNKCell d : B.getFreeCells()) {
+		i = d.i;
+		j = d.j;
+		if (i+1 < B.M && B.cellState(i+1,j) != MNKCellState.FREE) return d;
+		if (i-1 >= 0 && B.cellState(i-1,j) != MNKCellState.FREE) return d;
+		if (j+1 < B.N && B.cellState(i,j+1) != MNKCellState.FREE) return d;
+		if (j-1 >= 0 && B.cellState(i,j-1) != MNKCellState.FREE) return d;
+		if (i+1 < B.M && j+1 < B.N && B.cellState(i+1,j+1) != MNKCellState.FREE) return d;
+		if (i+1 < B.M && j-1 >= 0 && B.cellState(i+1,j-1) != MNKCellState.FREE) return d;
+		if (i-1 >= 0 && j+1 < B.N && B.cellState(i-1,j+1) != MNKCellState.FREE) return d;
+		if (i-1 >= 0 && j-1 >= 0 && B.cellState(i-1,j-1) != MNKCellState.FREE) return d;
 	}
-	return FC[0];
+	return B.getFreeCells()[0];
 }
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
@@ -197,32 +159,15 @@ public MNKCell getBestMoves(MNKBoard B) {
 			B.markCell(d.i,d.j);         
 		}
 
-		if(MC.length == 0){
-			B.markCell(B.M/2,B.N/2);
-			MC = B.getMarkedCells();
-			return MC[0];
-		} 
-
+		// if(MC.length == 0){
+		// 	B.markCell(B.M/2,B.N/2);
+		// 	MC = B.getMarkedCells();
+		// 	return MC[0];
+		// } 
 
 		for(MNKCell d : FC) {
-			if(B.markCell(d.i,d.j) == myWin) {
-				return d;  
-			} else {
-				B.unmarkCell();
-			}
-		}
-
-		if(MC.length == 1){
-			if(MNKCellState.FREE == B.cellState(B.M/2,B.N/2)){
-				MNKCell d = new MNKCell(B.M/2,B.N/2);
-				B.markCell(B.M/2,B.N/2);
-				return d;
-			} 
-			else {
-					MNKCell d = new MNKCell(B.M/2-1,B.N/2-1);
-					B.markCell(B.M/2-1,B.N/2-1);
-					return d;
-				}
+			if(B.markCell(d.i,d.j) == myWin) return d;  
+ 			else B.unmarkCell();
 		}
 
 		int pos = rand.nextInt(FC.length); 
@@ -253,7 +198,7 @@ public MNKCell getBestMoves(MNKBoard B) {
 				break;
 			} else {
 				B.markCell(d.i, d.j);		
-				if(B.M <= 6) score = alphabetaPruning(B, true,7,-10,10);
+				if(B.M <= 6) score = alphabetaPruning(B, true,6,-10,10);
 				// else if(B.M < 7) score = alphabetaPruning(B, true,5,-10,10);
 				else if(B.M <= 10) score = alphabetaPruning(B, true,4,-10,10);
 				else score = alphabetaPruning(B, true,1,-10,10);
