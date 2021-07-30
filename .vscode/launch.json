@@ -24,7 +24,7 @@
       "request": "launch",
       "mainClass": "mnkgame.MNKGame",
       "projectName": "MNKGame2.0_7ad60b8b",
-      "args": [7,7,4, "mnkgame.S"],
+      "args": [50,50,10, "mnkgame.S"],
     },
   ]
 }
