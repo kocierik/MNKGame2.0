@@ -117,59 +117,55 @@ MNKPlayerTester application:
 
 	---------------------------------------------------------------------------------------------
 
-
-
-
-
 	DA PRIMO
 
-	java -cp ".." mnkgame.MNKPlayerTester 3 3 3 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 4 3 3 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 4 4 3 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 4 4 4 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 5 4 4 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 5 5 5 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 6 4 4 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 6 5 4 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 6 6 4 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 6 6 5 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 6 6 6 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 7 4 4 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 7 5 4 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 7 6 4 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 7 7 4 mnkgame.S mnkgame.Solution -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 3 3 3 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 4 3 3 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 4 4 3 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 4 4 4 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 5 4 4 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 5 5 5 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 4 4 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 5 4 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 6 4 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 6 5 mnkgame.S mnkgame.M -v -t 1 -r 5   vedere
+	java -cp ".." mnkgame.MNKPlayerTester 6 6 6 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 4 4 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 5 4 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 6 4 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 7 4 mnkgame.S mnkgame.M -v -t 1 -r 5
 
-	java -cp ".." mnkgame.MNKPlayerTester 7 5 5 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 7 6 5 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 7 7 5 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 7 7 6 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 7 7 7 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 8 8 4 mnkgame.S mnkgame.Solution -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 10 10 5 mnkgame.S mnkgame.Solution -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 5 5 mnkgame.S mnkgame.M -v -t 1 -r 5 vedere
+	java -cp ".." mnkgame.MNKPlayerTester 7 6 5 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 7 5 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 7 6 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 7 7 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 8 8 4 mnkgame.S mnkgame.M -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 10 10 5 mnkgame.S mnkgame.M -v -t 1 -r 3
 
 	DA SECONDO
 
-	java -cp ".." mnkgame.MNKPlayerTester 3 3 3 mnkgame.Solution mnkgame.S -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 4 3 3 mnkgame.Solution mnkgame.S -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 4 4 3 mnkgame.Solution mnkgame.S -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 4 4 4 mnkgame.Solution mnkgame.S -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 5 4 4 mnkgame.Solution mnkgame.S -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 5 5 4 mnkgame.Solution mnkgame.S -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 5 5 5 mnkgame.Solution mnkgame.S -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 6 4 4 mnkgame.Solution mnkgame.S -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 6 5 4 mnkgame.Solution mnkgame.S -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 6 6 4 mnkgame.Solution mnkgame.S -v -t 1 -r 5
-	java -cp ".." mnkgame.MNKPlayerTester 6 6 5 mnkgame.Solution mnkgame.S -v -t 1 -r 3
-	java -cp ".." mnkgame.MNKPlayerTester 6 6 6 mnkgame.Solution mnkgame.S -v -t 1 -r 3
-	java -cp ".." mnkgame.MNKPlayerTester 7 4 4 mnkgame.Solution mnkgame.S -v -t 1 -r 3
-	java -cp ".." mnkgame.MNKPlayerTester 7 5 4 mnkgame.Solution mnkgame.S -v -t 1 -r 3
-	java -cp ".." mnkgame.MNKPlayerTester 7 6 4 mnkgame.Solution mnkgame.S -v -t 1 -r 3
-	java -cp ".." mnkgame.MNKPlayerTester 7 7 4 mnkgame.Solution mnkgame.S -v -t 1 -r 3
+	java -cp ".." mnkgame.MNKPlayerTester 3 3 3 mnkgame.M mnkgame.S -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 4 3 3 mnkgame.M mnkgame.S -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 4 4 3 mnkgame.M mnkgame.S -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 4 4 4 mnkgame.M mnkgame.S -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 5 4 4 mnkgame.M mnkgame.S -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 5 5 4 mnkgame.M mnkgame.S -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 5 5 5 mnkgame.M mnkgame.S -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 4 4 mnkgame.M mnkgame.S -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 5 4 mnkgame.M mnkgame.S -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 6 4 mnkgame.M mnkgame.S -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 6 6 5 mnkgame.M mnkgame.S -v -t 1 -r 3 vedere
+	java -cp ".." mnkgame.MNKPlayerTester 6 6 6 mnkgame.M mnkgame.S -v -t 1 -r 3
+	java -cp ".." mnkgame.MNKPlayerTester 7 4 4 mnkgame.M mnkgame.S -v -t 1 -r 3
+	java -cp ".." mnkgame.MNKPlayerTester 7 5 4 mnkgame.M mnkgame.S -v -t 1 -r 3
+	java -cp ".." mnkgame.MNKPlayerTester 7 6 4 mnkgame.M mnkgame.S -v -t 1 -r 3
+	java -cp ".." mnkgame.MNKPlayerTester 7 7 4 mnkgame.M mnkgame.S -v -t 1 -r 3
 
-	java -cp ".." mnkgame.MNKPlayerTester 7 5 5 mnkgame.Solution mnkgame.S -v -t 1 -r 2
-	java -cp ".." mnkgame.MNKPlayerTester 7 6 5 mnkgame.Solution mnkgame.S -v -t 1 -r 2
-	java -cp ".." mnkgame.MNKPlayerTester 7 7 5 mnkgame.Solution mnkgame.S -v -t 1 -r 2
-	java -cp ".." mnkgame.MNKPlayerTester 7 7 6 mnkgame.Solution mnkgame.S -v -t 1 -r 2
-	java -cp ".." mnkgame.MNKPlayerTester 7 7 7 mnkgame.Solution mnkgame.S -v -t 1 -r 2
-	java -cp ".." mnkgame.MNKPlayerTester 8 8 4 mnkgame.Solution mnkgame.S -v -t 1 -r 2
-	java -cp ".." mnkgame.MNKPlayerTester 10 10 5 mnkgame.Solution mnkgame.S -v -t 1 -r 5
+	java -cp ".." mnkgame.MNKPlayerTester 7 5 5 mnkgame.M mnkgame.S -v -t 1 -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 7 6 5 mnkgame.M mnkgame.S -v -t 1 -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 7 7 5 mnkgame.M mnkgame.S -v -t 1 -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 7 7 6 mnkgame.M mnkgame.S -v -t 1 -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 7 7 7 mnkgame.M mnkgame.S -v -t 1 -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 8 8 4 mnkgame.M mnkgame.S -v -t 1 -r 2
+	java -cp ".." mnkgame.MNKPlayerTester 10 10 5 mnkgame.M mnkgame.S -v -t 1 -r 3

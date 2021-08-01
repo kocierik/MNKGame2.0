@@ -38,7 +38,7 @@ import mnkgame.MNKBoard;
  * <p> It can detect a single-move win or loss. In all the other cases behaves randomly.
  * </p> 
  */
-public class S implements MNKPlayer {
+public class M implements MNKPlayer {
 	private static final MNKGameState OPEN = null;
 	private Random rand;
 	private MNKBoard B;
@@ -49,7 +49,7 @@ public class S implements MNKPlayer {
 	/**
 	 * Default empty constructor
 	 */
-	public S() {}
+	public M() {}
 
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
@@ -131,19 +131,25 @@ public MNKCell[] removeBadMoves(MNKBoard B) {
 
 public MNKCell getBestMoves(MNKBoard B) {
 	int i, j;
+	HashSet<MNKCell> cellBest = new HashSet<MNKCell>();
 	for(MNKCell d : B.getFreeCells()) {
 		i = d.i;
 		j = d.j;
-		if (i+1 < B.M && B.cellState(i+1,j) != MNKCellState.FREE) return d;
-		if (j+1 < B.N && B.cellState(i,j+1) != MNKCellState.FREE) return d;
-		if (i-1 >= 0 && B.cellState(i-1,j) != MNKCellState.FREE) return d;
-		if (i+1 < B.M && j+1 < B.N && B.cellState(i+1,j+1) != MNKCellState.FREE) return d;
-		if (i+1 < B.M && j-1 >= 0 && B.cellState(i+1,j-1) != MNKCellState.FREE) return d;
-		if (i-1 >= 0 && j+1 < B.N && B.cellState(i-1,j+1) != MNKCellState.FREE) return d;
-		if (i-1 >= 0 && j-1 >= 0 && B.cellState(i-1,j-1) != MNKCellState.FREE) return d;
-		if (j-1 >= 0 && B.cellState(i,j-1) != MNKCellState.FREE) return d;
+		if (i+1 < B.M && B.cellState(i+1,j) != MNKCellState.FREE) cellBest.add(d);
+		if (j+1 < B.N && B.cellState(i,j+1) != MNKCellState.FREE) cellBest.add(d);
+		if (i-1 >= 0 && B.cellState(i-1,j) != MNKCellState.FREE) cellBest.add(d);
+		if (i+1 < B.M && j+1 < B.N && B.cellState(i+1,j+1) != MNKCellState.FREE) cellBest.add(d);
+		if (i+1 < B.M && j-1 >= 0 && B.cellState(i+1,j-1) != MNKCellState.FREE) cellBest.add(d);
+		if (i-1 >= 0 && j+1 < B.N && B.cellState(i-1,j+1) != MNKCellState.FREE) cellBest.add(d);
+		if (i-1 >= 0 && j-1 >= 0 && B.cellState(i-1,j-1) != MNKCellState.FREE) cellBest.add(d);
+		if (j-1 >= 0 && B.cellState(i,j-1) != MNKCellState.FREE) cellBest.add(d);
 	}
-	return B.getFreeCells()[0];
+	if(cellBest.size() != 0){
+		MNKCell[] cells = new MNKCell[cellBest.size()];
+		return cellBest.toArray(cells)[rand.nextInt(cells.length)];
+	} else { 
+		return B.getFreeCells()[0];
+	}
 }
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
@@ -215,6 +221,6 @@ public MNKCell getBestMoves(MNKBoard B) {
 	}
 
 		public String playerName() {
-			return "AIBest";
+			return "TMP";
 		}
 }
