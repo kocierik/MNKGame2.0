@@ -151,7 +151,8 @@ public MNKCell getBestMoves(MNKBoard B) {
 		if(MC.length > 0) {
 			MNKCell d = MC[MC.length-1]; 
 			B.markCell(d.i,d.j);         
-		} 	
+		}
+
 		if(B.M == 6 && ((B.N == 6 && B.K == 4) || (B.N == 5 && B.K == 4))) if(B.MC.size() == 0) { B.markCell(0, 0); return new MNKCell(0, 0); }
 		if((B.M == 7 && B.N == 4 && B.K == 4) || (B.M == 7 && B.N == 5 && B.K == 4) || (B.M == 7 && B.N == 7 && B.K == 5)) {
 			if(B.cellState(B.M/2, B.M/2) == MNKCellState.FREE) { B.markCell(B.M/2, B.M/2); return new MNKCell(B.M/2, B.M/2); }
@@ -159,6 +160,7 @@ public MNKCell getBestMoves(MNKBoard B) {
 		if(B.M == 6 && (B.N != 4 && B.K != 4)) {
 			if(B.cellState(B.M/2, B.M/2) == MNKCellState.FREE) { B.markCell(B.M/2, B.M/2); return new MNKCell(B.M/2, B.M/2); }
 		}
+		
 		for(MNKCell d : FC) {
 			if(B.markCell(d.i,d.j) == myWin) return d;  
 			else B.unmarkCell();
