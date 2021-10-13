@@ -100,8 +100,8 @@ public double alphabetaPruning(MNKBoard B, boolean isMaximizing, int depth, doub
 			return best;
 	}
 }
-
-public MNKCell[] removeBadMoves(MNKBoard B) {
+// analizza solo le celle vicine a quelle nostro o a quelle dell'avversario a distanza K
+public MNKCell[] getNearFreeCell(MNKBoard B) {
 	HashSet<MNKCell> FC = new HashSet<MNKCell>();
 	int i, j;
 	for(MNKCell d : B.getMarkedCells()){
@@ -128,14 +128,14 @@ public MNKCell getBestMoves(MNKBoard B) {
 	for(MNKCell d : B.getFreeCells()) {
 		i = d.i;
 		j = d.j;
-		if (i+1 < B.M && B.cellState(i+1,j) != MNKCellState.FREE) cellBest.add(d);
-		if (j+1 < B.N && B.cellState(i,j+1) != MNKCellState.FREE) cellBest.add(d);
-		if (i-1 >= 0 && B.cellState(i-1,j) != MNKCellState.FREE) cellBest.add(d);
-		if (i+1 < B.M && j+1 < B.N && B.cellState(i+1,j+1) != MNKCellState.FREE) cellBest.add(d);
-		if (i+1 < B.M && j-1 >= 0 && B.cellState(i+1,j-1) != MNKCellState.FREE) cellBest.add(d);
-		if (i-1 >= 0 && j+1 < B.N && B.cellState(i-1,j+1) != MNKCellState.FREE) cellBest.add(d);
-		if (i-1 >= 0 && j-1 >= 0 && B.cellState(i-1,j-1) != MNKCellState.FREE) cellBest.add(d);
-		if (j-1 >= 0 && B.cellState(i,j-1) != MNKCellState.FREE) cellBest.add(d);
+		if (i+1 < B.M && B.cellState(i+1,j) == MNKCellState.P2) cellBest.add(d);
+		if (j+1 < B.N && B.cellState(i,j+1) == MNKCellState.P2) cellBest.add(d);
+		if (i-1 >= 0 && B.cellState(i-1,j) != MNKCellState.P2) cellBest.add(d);
+		if (i+1 < B.M && j+1 < B.N && B.cellState(i+1,j+1) != MNKCellState.P2) cellBest.add(d);
+		if (i+1 < B.M && j-1 >= 0 && B.cellState(i+1,j-1) != MNKCellState.P2) cellBest.add(d);
+		if (i-1 >= 0 && j+1 < B.N && B.cellState(i-1,j+1) != MNKCellState.P2) cellBest.add(d);
+		if (i-1 >= 0 && j-1 >= 0 && B.cellState(i-1,j-1) != MNKCellState.P2) cellBest.add(d);
+		if (j-1 >= 0 && B.cellState(i,j-1) != MNKCellState.P2) cellBest.add(d);
 	}
 	if(cellBest.size() != 0){
 		MNKCell[] cells = new MNKCell[cellBest.size()];
@@ -153,14 +153,6 @@ public MNKCell getBestMoves(MNKBoard B) {
 			B.markCell(d.i,d.j);         
 		}
 
-		if(B.M == 6 && ((B.N == 6 && B.K == 4) || (B.N == 5 && B.K == 4))) if(B.MC.size() == 0) { B.markCell(0, 0); return new MNKCell(0, 0); }
-		if((B.M == 7 && B.N == 4 && B.K == 4) || (B.M == 7 && B.N == 5 && B.K == 4) || (B.M == 7 && B.N == 7 && B.K == 5)) {
-			if(B.cellState(B.M/2, B.M/2) == MNKCellState.FREE) { B.markCell(B.M/2, B.M/2); return new MNKCell(B.M/2, B.M/2); }
-		}
-		if(B.M == 6 && (B.N != 4 && B.K != 4)) {
-			if(B.cellState(B.M/2, B.M/2) == MNKCellState.FREE) { B.markCell(B.M/2, B.M/2); return new MNKCell(B.M/2, B.M/2); }
-		}
-		
 		for(MNKCell d : FC) {
 			if(B.markCell(d.i,d.j) == myWin) return d;  
 			else B.unmarkCell();
@@ -188,7 +180,7 @@ public MNKCell getBestMoves(MNKBoard B) {
 		
 		int i = 1; int j = 0;
 		MNKCell bestMoves = getBestMoves(B);
-		MNKCell[] goodMoves = removeBadMoves(B);
+		MNKCell[] goodMoves = getNearFreeCell(B);
 		double score = 0;
 		double bestScore = -10;
 
