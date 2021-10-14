@@ -18,6 +18,20 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this file.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * 
+ * 
+ * 
+ * 
+
+
+
+
+
+
+
+
+ COPIA DOVE POSSIAMO FARE TEST
  */
 
 package mnkgame;
@@ -32,7 +46,7 @@ import mnkgame.MNKBoard;
  * <p> It can detect a single-move win or loss. In all the other cases behaves randomly.
  * </p> 
  */
-public class S implements MNKPlayer {
+public class copy implements MNKPlayer {
 	private static final MNKGameState OPEN = null;
 	private Random rand;
 	private MNKBoard B;
@@ -43,7 +57,7 @@ public class S implements MNKPlayer {
 	/**
 	 * Default empty constructor
 	 */
-	public S() {}
+	public copy() {}
 
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
@@ -128,14 +142,14 @@ public MNKCell getBestMoves(MNKBoard B) {
 	for(MNKCell d : B.getFreeCells()) {
 		i = d.i;
 		j = d.j;
-		if (i+1 < B.M && B.cellState(i+1,j) == MNKCellState.P2) cellBest.add(d);
-		if (j+1 < B.N && B.cellState(i,j+1) == MNKCellState.P2) cellBest.add(d);
-		if (i-1 >= 0 && B.cellState(i-1,j) == MNKCellState.P2) cellBest.add(d);
-		if (i+1 < B.M && j+1 < B.N && B.cellState(i+1,j+1) == MNKCellState.P2) cellBest.add(d);
-		if (i+1 < B.M && j-1 >= 0 && B.cellState(i+1,j-1) == MNKCellState.P2) cellBest.add(d);
-		if (i-1 >= 0 && j+1 < B.N && B.cellState(i-1,j+1) == MNKCellState.P2) cellBest.add(d);
-		if (i-1 >= 0 && j-1 >= 0 && B.cellState(i-1,j-1) == MNKCellState.P2) cellBest.add(d);
-		if (j-1 >= 0 && B.cellState(i,j-1) == MNKCellState.P2) cellBest.add(d);
+		if (i+1 < B.M && B.cellState(i+1,j) != MNKCellState.FREE) cellBest.add(d);
+		if (j+1 < B.N && B.cellState(i,j+1) != MNKCellState.FREE) cellBest.add(d);
+		if (i-1 >= 0 && B.cellState(i-1,j) != MNKCellState.FREE) cellBest.add(d);
+		if (i+1 < B.M && j+1 < B.N && B.cellState(i+1,j+1) != MNKCellState.FREE) cellBest.add(d);
+		if (i+1 < B.M && j-1 >= 0 && B.cellState(i+1,j-1) != MNKCellState.FREE) cellBest.add(d);
+		if (i-1 >= 0 && j+1 < B.N && B.cellState(i-1,j+1) != MNKCellState.FREE) cellBest.add(d);
+		if (i-1 >= 0 && j-1 >= 0 && B.cellState(i-1,j-1) != MNKCellState.FREE) cellBest.add(d);
+		if (j-1 >= 0 && B.cellState(i,j-1) != MNKCellState.FREE) cellBest.add(d);
 	}
 	if(cellBest.size() != 0){
 		MNKCell[] cells = new MNKCell[cellBest.size()];
@@ -212,6 +226,6 @@ public MNKCell getBestMoves(MNKBoard B) {
 	}
 
 		public String playerName() {
-			return "Android";
+			return "AndroidNEW";
 		}
 }
