@@ -31,7 +31,7 @@ package mnkgame;
 
 import java.util.HashSet;
 import java.util.Random;
-
+import java.security.*;
 public class S implements MNKPlayer {
 	private static final MNKGameState OPEN = null;
 	private Random rand;
@@ -40,8 +40,8 @@ public class S implements MNKPlayer {
 	private static MNKGameState yourWin;
 	private int TIMEOUT;
 	private long start;
-	private long[][][] zobristTable;
-	private Random random;
+	private SecureRandom random;
+	private long[][] zobristTable;
 	/**
 	 * Default empty constructor
 	 */
@@ -56,8 +56,9 @@ public class S implements MNKPlayer {
 		yourWin = first ? MNKGameState.WINP2 : MNKGameState.WINP1;
 		TIMEOUT = timeout_in_secs;	
 
-		zobristTable = new long [M][N][2];
-		initTable();
+		zobristTable = new long [M*N][2];
+		zEnPassant = new long[B.N];
+		zCastle = new long[4];
 	}
 //--------------------------------------------------------------------------------
 
@@ -158,22 +159,29 @@ public MNKCell getBestMoves(MNKBoard B) {
 }
 //--------------------------------------------------------------------------------
 
-	// Inizializzazione tabella di zobristTable
-	public void initTable(){
-		random = new Random();
-		for (int i = 0; i<B.M; i++)
-			for (int j = 0; j<B.N; j++)
-				for (int k = 0; k<2; k++)
-					zobristTable[i][j][k] = random.nextInt(10000);
+	// Prende un valore random
+	public long random64(){
+		random = new SecureRandom();
+		return random.nextLong();
 	}
+
 //--------------------------------------------------------------------------------
+	// Inizializzazione tabella di zobristTable
+	public void zobristTable(){
+		int i;
+		for ( i = 0; i < zobristTable.length; i++) {
+			zobristTable[i][0] = random64();
+			zobristTable[i][1] = random64();
+		}
+	}
+	//--------------------------------------------------------------------------------
 
 	// Ritorna un valore hash in output utile per la zobristTable
 	public long getHash(MNKCell[] MC){
-		long hash = 0;
+		long hash = 0; 
 		for (MNKCell mnkCell : MC) {
 			int piece = mnkCell.state == MNKCellState.P1 ? 1 : 0;
-			hash ^= zobristTable[mnkCell.i][mnkCell.j][piece];
+			hash ^= zobristTable[mnkCell.i*Math.min(B.M, B.N)+mnkCell.j][piece];
 		}
 		return hash;
 	}
@@ -182,6 +190,10 @@ public MNKCell getBestMoves(MNKBoard B) {
 	// Fulcro dell'applicativo che esegue le funzioni citate sopra
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
 		start = System.currentTimeMillis();	
+		zobristTable();
+		getHash(MC);
+		// System.out.println(getHash(MC));
+		// System.out.println(getHash(MC));
 
 		// funzione che va a marcare l'ultima cella inserita dall'avversario
 		// scritta dal prof necessaria per il funzionamento
@@ -246,7 +258,6 @@ public MNKCell getBestMoves(MNKBoard B) {
 				break;
 			} else {	
 				B.markCell(d.i, d.j);	
-				System.out.println(getHash(B.getMarkedCells()));
 				if(B.M <= 6) score = alphabetaPruning(B, true,6,-1000,1000);
 				else if(B.M <= 10) score = alphabetaPruning(B, true,4,-1000,1000);
 				B.unmarkCell();
