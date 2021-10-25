@@ -57,8 +57,6 @@ public class S implements MNKPlayer {
 		TIMEOUT = timeout_in_secs;	
 
 		zobristTable = new long [M*N][2];
-		zEnPassant = new long[B.N];
-		zCastle = new long[4];
 	}
 //--------------------------------------------------------------------------------
 
