@@ -1,33 +1,4 @@
-/*
- *  Copyright (C) 2021 Pietro Di Lena
- *  
- *  This file is part of the MNKGame v2.0 software developed for the
- *  students of the course "Algoritmi e Strutture di Dati" first 
- *  cycle degree/bachelor in Computer Science, University of Bologna
- *  A.Y. 2020-2021.
- *
- *  MNKGame is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This  is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this file.  If not, see <https://www.gnu.org/licenses/>.
- * 
- * 
- * 
- * 
- * 
-
- */
-
 package mnkgame;
-
 
 import java.util.HashSet;
 import java.util.Random;
@@ -35,16 +6,16 @@ import java.security.*;
 public class copy implements MNKPlayer {
 	private static final MNKGameState OPEN = null;
 	private Random rand;
-	private MNKBoard B;
 	private static MNKGameState myWin;
 	private static MNKGameState yourWin;
 	private int TIMEOUT;
 	private long start;
 	private SecureRandom random;
-	private long[][] zobristTable;
-	private long[] zEnPassant;
-	private long[] zCastle;
-	private long zBlackMove;
+	private long[][][] zobristTable;
+	private MNKBoard B;
+	private long currentHash;
+
+	private int M,N,K;
 	/**
 	 * Default empty constructor
 	 */
@@ -55,13 +26,15 @@ public class copy implements MNKPlayer {
 		// New random seed for each game
 		rand    = new Random(System.currentTimeMillis()); 
 		B       = new MNKBoard(M,N,K);
+		this.M = M;
+		this.N = N;
+		this.K = K;
 		myWin   = first ? MNKGameState.WINP1 : MNKGameState.WINP2; 
 		yourWin = first ? MNKGameState.WINP2 : MNKGameState.WINP1;
 		TIMEOUT = timeout_in_secs;	
-
-		zobristTable = new long [M*N][2];
-		zEnPassant = new long[B.N];
-		zCastle = new long[4];
+		currentHash = 0;
+		zobristTable = new long [M][N][2];
+		zobristTable();
 	}
 //--------------------------------------------------------------------------------
 
@@ -78,10 +51,26 @@ public class copy implements MNKPlayer {
 		else if(state == myWin) return 10;
 	  else return -10;
 }
+
+public int heuristic(){
+	throw new Error("Heuristic not implemented yet");
+}
+
+
+private MNKGameState markCell(int i, int j) {
+	currentHash ^= zobristTable[i][j][B.currentPlayer()];
+	return B.markCell(i, j);
+}
+private void unmarkCell() {
+	MNKCell c = B.getMarkedCells()[B.getMarkedCells().length-1];
+	currentHash ^= zobristTable[c.i][c.j][B.currentPlayer() == 1 ? 0 : 1];
+	B.unmarkCell();
+}
+
 //--------------------------------------------------------------------------------
 
 	// Applicazione dell'alphabetaPruning
-public double alphabetaPruning(MNKBoard B, boolean isMaximizing, int depth, double alpha, double beta) {
+public double alphabetaPruning(boolean isMaximizing, int depth, double alpha, double beta) {
 	double best;
 	MNKCell FC[] = B.getFreeCells();
 	if (depth == 0 || B.gameState != MNKGameState.OPEN || (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
@@ -90,7 +79,7 @@ public double alphabetaPruning(MNKBoard B, boolean isMaximizing, int depth, doub
 			best = 1000;
 			for(MNKCell d : FC) {
 				B.markCell(d.i, d.j);
-				best = Math.min(best, alphabetaPruning(B,!isMaximizing,depth-1,alpha,beta));
+				best = Math.min(best, alphabetaPruning(!isMaximizing,depth-1,alpha,beta));
 				beta = Math.min(best, beta);
 				B.unmarkCell();
 				if(alpha >= beta) break;
@@ -100,7 +89,7 @@ public double alphabetaPruning(MNKBoard B, boolean isMaximizing, int depth, doub
 			best = -1000;
 			for(MNKCell d : FC) {
 				B.markCell(d.i, d.j);
-				best = Math.max(best, alphabetaPruning(B,!isMaximizing,depth-1,alpha,beta));
+				best = Math.max(best, alphabetaPruning(!isMaximizing,depth-1,alpha,beta));
 				alpha = Math.max(best, alpha);
 				B.unmarkCell();
 				if(alpha >= beta) break;
@@ -171,32 +160,22 @@ public MNKCell getBestMoves(MNKBoard B) {
 //--------------------------------------------------------------------------------
 	// Inizializzazione tabella di zobristTable
 	public void zobristTable(){
-		int i;
-		for ( i = 0; i < zobristTable.length; i++) {
-			zobristTable[i][0] = random64();
-			zobristTable[i][1] = random64();
+		for (int i = 0; i < M; i++) {
+			for (int j = 0; j < N; j++) {
+				zobristTable[i][j][0] = random64();
+				zobristTable[i][j][1] = random64();
+			}
 		}
 	}
 	//--------------------------------------------------------------------------------
 
 	// Ritorna un valore hash in output utile per la zobristTable
-	public long getHash(MNKCell[] MC){
-		long hash = 0; 
-		for (MNKCell mnkCell : MC) {
-			int piece = mnkCell.state == MNKCellState.P1 ? 1 : 0;
-			hash ^= zobristTable[mnkCell.i*Math.min(B.M, B.N)+mnkCell.j][piece];
-		}
-		return hash;
-	}
+
 //--------------------------------------------------------------------------------
 
 	// Fulcro dell'applicativo che esegue le funzioni citate sopra
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
 		start = System.currentTimeMillis();	
-		zobristTable();
-		getHash(MC);
-		// System.out.println(getHash(MC));
-		// System.out.println(getHash(MC));
 
 		// funzione che va a marcare l'ultima cella inserita dall'avversario
 		// scritta dal prof necessaria per il funzionamento
@@ -261,8 +240,8 @@ public MNKCell getBestMoves(MNKBoard B) {
 				break;
 			} else {	
 				B.markCell(d.i, d.j);	
-				if(B.M <= 6) score = alphabetaPruning(B, true,6,-1000,1000);
-				else if(B.M <= 10) score = alphabetaPruning(B, true,4,-1000,1000);
+				if(B.M <= 6) score = alphabetaPruning(true,6,-1000,1000);
+				else if(B.M <= 10) score = alphabetaPruning(true,4,-1000,1000);
 				B.unmarkCell();
 				if (score > bestScore){
 					bestScore = score;
