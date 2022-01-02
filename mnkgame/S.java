@@ -47,7 +47,7 @@ public class S implements MNKPlayer {
 		currentHash = 0;
 		zobristTable = new long [M][N][2];
 		zobristTable();
-	}
+	}   
 //--------------------------------------------------------------------------------
 
 	/* Valutazione dello stato di gioco:
@@ -85,15 +85,10 @@ private int[] transposition(final int searchDepth) {
 	return transposition(zobrist(), marked() , c[c.length - 1].i * Math.min(M,N) + c[c.length - 1].j, searchDepth);
 }
 
-  // Returns a cache entry for the current board. If the current board is already
-  // in the transposition table the entry contains the actual data, otherwhise
-  // its fields 2,3 are dummy. A non-cached board can be therefore identified
-  // by entry[3] == 2. Cost: O(1)
   private int[] transposition(final long hash, final int marked, final int lastCell, final int searchDepth) {
     if (cache.containsKey(hash)) {
       int[] cached = cache.get(hash);
-      // Make sure the board has the same number of marked symbols and the last
-      // cell marked matches. This is done to avoid false positives in the cache
+
       if (cached[0] == marked && cached[1] == lastCell && cached[2] >= searchDepth
       // useless
           && cached[3] != 2)
