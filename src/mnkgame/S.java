@@ -27,17 +27,38 @@ import java.util.HashSet;
 import java.util.Random;
 import java.security.*;
 public class S implements MNKPlayer {
-	private static final MNKGameState OPEN = null;
-	private Random rand;
 	private static MNKGameState myWin;
 	private static MNKGameState yourWin;
+  private static MNKCellState myCell;
+	private MNKBoard B;
+  private int M,N,K, minMN;
+  private static int MAX = 100_000, MIN = -MAX;
+
 	private int TIMEOUT;
+	private int TIMEOUT_VALUE = MAX+1;
 	private long start;
+
+	private Random rand;
 	private SecureRandom random;
 	private long[][][] zobristTable;
-	private MNKBoard B;
+  // 6 * 4 (int) * TRANSPOSITION_TABLE_LENGTH = 
+  private static int TRANSPOSITION_TABLE_LENGTH = 1024 * 1024 * 4;
+  private static int TRANSPOSITION_ENTRY_LENGTH = 6;
+  private static int TRANSPOSITION_ENTRY_NOT_FOUND = Integer.MAX_VALUE;
+  private static int TRANSPOSITION_KIND_EXACT = 0,
+    TRANSPOSITION_KIND_LOWER = -1, TRANSPOSITION_KIND_UPPER = 1;
+  // transposition entry structure: [
+  // first 32 bits of the hash key, 
+  // last 32 bits of the hash key, 
+  // searchDepth, 
+  // bestMove, 
+  // value, 
+  // value kind (one of TRANSPOSITION_KIND_*)
+  // ]
+  private int[][] transposition;
 
-  private int M,N,K;
+  // TODO: remove, debug only
+  private int tre = 0, tro = 0, trh = 0, trm = 0;
 
 	/**
 	 * Default empty constructor
@@ -52,13 +73,20 @@ public class S implements MNKPlayer {
     this.M = M;
     this.N = N;
     this.K = K;
+    this.minMN = Math.min(M,N);
 		myWin   = first ? MNKGameState.WINP1 : MNKGameState.WINP2; 
 		yourWin = first ? MNKGameState.WINP2 : MNKGameState.WINP1;
+		myCell   = first ? MNKCellState.P1 : MNKCellState.P2;
 		TIMEOUT = timeout_in_secs;	
     currentHash = 0;
 
+    MAX *= M*N;
+    MIN *= M*N;
+
 		zobristTable = new long [M][N][2];
-    zobristTable();
+    fillZobristHashes();
+    transposition = new int[TRANSPOSITION_TABLE_LENGTH][];
+    tre = tro = trh = trm = 0;
 	}
 //--------------------------------------------------------------------------------
 
@@ -72,12 +100,18 @@ public class S implements MNKPlayer {
 		MNKGameState state = B.gameState();
 		if(state == MNKGameState.OPEN) return heuristic();
 		else if(state == MNKGameState.DRAW) return 0;
-		else if(state == myWin) return 10;
-    else return -10;
+		else if(state == myWin) return 100_000;
+    else return -100_000;
   }
   
   public int heuristic() {
-    throw new Error("heuristic not implemented yet");
+    int v = 0;
+    for (int i = 0; i < M; i++) {
+      for (int j = 0; j < N; j++) {
+        v += B.cellState(i,j) == myCell ? 1 : -1;
+      }
+    }
+    return v;
   }
 
   private long currentHash;
@@ -91,87 +125,112 @@ public class S implements MNKPlayer {
     B.unmarkCell();
   }
 
+  private boolean isTimeRunningOut() {
+    return (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0);
+  }
+
+  private int currentHashIndex() {
+    return Math.abs((int) (currentHash % TRANSPOSITION_TABLE_LENGTH));
+  }
+
+  // these function take for granted that the search is relative to currentHash
+  private void storeTransposition(int searchDepth, int bestMove, int value, int valueKind) {
+    int firstHash = (int) (currentHash >> 32), secondHash = (int) currentHash;
+    if(transposition[currentHashIndex()] != null)
+      tro++;
+    else
+      tre++;
+    
+    transposition[currentHashIndex()] = new int[]{
+      firstHash, secondHash, searchDepth, bestMove, value, valueKind
+    };
+  }
+  private int bestMove = -1;
+  private int retrieveTransposition(int searchDepth, int alpha, int beta) {
+    int[] entry = transposition[currentHashIndex()];
+    int firstHash = (int) (currentHash >> 32), secondHash = (int) currentHash;
+    if(transposition[currentHashIndex()] != null)
+    // avoid collisions (verify the hashes match)
+    if(entry != null && firstHash == entry[0] && secondHash == entry[1]) {
+      if (entry[2] >= searchDepth) {
+        if (entry[5] == TRANSPOSITION_KIND_EXACT)
+          return entry[4];
+        if (entry[5] == TRANSPOSITION_KIND_LOWER && entry[4] <= alpha)
+          return alpha;
+        if (entry[5] == TRANSPOSITION_KIND_UPPER && entry[4] >= beta)
+          return beta;
+      }
+      bestMove = entry[3];
+      trh++;
+    } else
+      trm++;
+    return TRANSPOSITION_ENTRY_NOT_FOUND;
+  }
+
+  private int[] getFreeCells() {
+    int[] res = new int[B.getFreeCells().length];
+    int i = 0;
+    boolean doWeHaveTheBestMove = false;
+    for(MNKCell c : B.getFreeCells()) {
+      res[i++] = c.i*minMN + c.j;
+      if(res[i-1] == bestMove)
+        doWeHaveTheBestMove = true;
+    }
+
+    // take into account any possible bestMove
+    if(bestMove != -1 && doWeHaveTheBestMove) {
+      int tmp = res[0];
+      res[0] = bestMove;
+      res[res.length-1] = tmp;
+    }
+
+    return res;
+  }
+
 //--------------------------------------------------------------------------------
 
-  private int negaMax(int alpha, int beta, int depth) {
-    // System.out.printf("zobrist hash: %d\n", currentHash);
-    if(B.gameState() != MNKGameState.OPEN || depth == 0) return evaluate();
-    for(MNKCell c : B.getFreeCells())  {
-      markCell(c.i,c.j);
-      int score = -negaMax(-beta, -alpha, depth - 1);
-      unmarkCell();
-      // System.out.printf("%d < %d < %d\n", -beta, score, -alpha);
-      if(score >= beta)
-        return beta;   //  fail hard beta-cutoff
-      if(score > alpha)
-        alpha = score; // alpha acts like max in MiniMax
+  public int negamax(int searchDepth, int alpha, int beta, int color) {
+    int value, localBestMove = -1, valueKind = TRANSPOSITION_KIND_LOWER;
+    if((value = retrieveTransposition(searchDepth, alpha, beta)) != TRANSPOSITION_ENTRY_NOT_FOUND)
+      return value;
+    if(isTimeRunningOut())
+      return TIMEOUT_VALUE;
+    if (searchDepth == 0 || B.gameState != MNKGameState.OPEN) {
+      value = color * evaluate() / B.getMarkedCells().length;
+      storeTransposition(searchDepth, bestMove, value, TRANSPOSITION_KIND_EXACT);
+      return value;
     }
+
+    for(int c : getFreeCells()) {
+      markCell(c/minMN, c%minMN); 
+      value = -negamax(searchDepth-1, -beta, -alpha, -color);
+      unmarkCell();
+      if(value == -TIMEOUT_VALUE)
+        // deliberately don't store anyting in the transposition table
+        return TIMEOUT_VALUE;
+
+      if(value >= beta) {
+        storeTransposition(searchDepth, c, beta, TRANSPOSITION_KIND_UPPER);
+        return beta;
+      }
+      if(value > alpha) {
+        valueKind = TRANSPOSITION_KIND_EXACT;
+        localBestMove = c;
+        alpha = value;
+      }
+    }
+    storeTransposition(searchDepth, localBestMove == -1 ? bestMove : localBestMove, alpha, valueKind);
     return alpha;
   }
 
 //--------------------------------------------------------------------------------
-
-// analizza solo le celle vicine a quelle nostro o a quelle dell'avversario a distanza K
-// Utile per non prendere in considerazione celle troppo lontane
-public MNKCell[] getNearFreeCell(MNKBoard B) {
-  HashSet<MNKCell> FC = new HashSet<MNKCell>();
-  int i, j;
-  for(MNKCell d : B.getMarkedCells()){
-    i = d.i;
-    j = d.j;
-    for(int k = 1; k < B.K; k++) {
-      if(i+k < B.M && B.cellState(i+k,j) == MNKCellState.FREE) FC.add(new MNKCell(i+k,j));
-      if(j+k < B.N && B.cellState(i,j+k) == MNKCellState.FREE) FC.add(new MNKCell(i,j+k));
-      if(i-k >= 0 && B.cellState(i-k,j) == MNKCellState.FREE) FC.add(new MNKCell(i-k,j));
-      if(j-k >= 0 && B.cellState(i,j-k) == MNKCellState.FREE) FC.add(new MNKCell(i,j-k));
-      if(i+k < B.M && j+k < B.N && B.cellState(i+k,j+k) == MNKCellState.FREE) FC.add(new MNKCell(i+k,j+k));
-      if(i+k < B.M && j-k >= 0 && B.cellState(i+k,j-k) == MNKCellState.FREE) FC.add(new MNKCell(i+k,j-k));
-      if(i-k >= 0 && j+k < B.N && B.cellState(i-k,j+k) == MNKCellState.FREE) FC.add(new MNKCell(i-k,j+k));
-      if(i-k >= 0 && j-k >= 0 && B.cellState(i-k,j-k) == MNKCellState.FREE) FC.add(new MNKCell(i-k,j-k));
-    }
-  }
-  MNKCell[] arrayFC = new MNKCell[FC.size()];
-  return FC.toArray(arrayFC);
-}
-//--------------------------------------------------------------------------------
-
-
-// Permette di analizzare solo le celle libere vicine alle nostre mosse
-// In questo modo giocheremo sempre su un certo "lato" di gioco. 
-// Evitando così mosse inutili dove non sono presenti mosse nostre o dell'avversario
-public MNKCell getBestMoves(MNKBoard B) {
-  int i, j;
-  HashSet<MNKCell> cellBest = new HashSet<MNKCell>();
-  for(MNKCell d : B.getFreeCells()) {
-    i = d.i;
-    j = d.j;
-    if (i+1 < B.M && B.cellState(i+1,j) != MNKCellState.FREE) cellBest.add(d);
-    if (j+1 < B.N && B.cellState(i,j+1) != MNKCellState.FREE) cellBest.add(d);
-    if (i-1 >= 0 && B.cellState(i-1,j) != MNKCellState.FREE) cellBest.add(d);
-    if (i+1 < B.M && j+1 < B.N && B.cellState(i+1,j+1) != MNKCellState.FREE) cellBest.add(d);
-    if (i+1 < B.M && j-1 >= 0 && B.cellState(i+1,j-1) != MNKCellState.FREE) cellBest.add(d);
-    if (i-1 >= 0 && j+1 < B.N && B.cellState(i-1,j+1) != MNKCellState.FREE) cellBest.add(d);
-    if (i-1 >= 0 && j-1 >= 0 && B.cellState(i-1,j-1) != MNKCellState.FREE) cellBest.add(d);
-    if (j-1 >= 0 && B.cellState(i,j-1) != MNKCellState.FREE) cellBest.add(d);
-  }
-  if(cellBest.size() != 0){
-    MNKCell[] cells = new MNKCell[cellBest.size()];
-    return cellBest.toArray(cells)[rand.nextInt(cells.length)];
-  } else { 
-    return B.getFreeCells()[0];
-  }
-}
-//--------------------------------------------------------------------------------
-
-// Prende un valore random
+// Inizializzazione tabella di zobristTable
 public long random64(){
   random = new SecureRandom();
   return random.nextLong();
 }
 
-//--------------------------------------------------------------------------------
-// Inizializzazione tabella di zobristTable
-public void zobristTable(){
+public void fillZobristHashes(){
   for (int i = 0; i < M; i++) {
     for (int j = 0; j < N; j++) {
       zobristTable[i][j][0] = random64();
@@ -180,42 +239,54 @@ public void zobristTable(){
   }
 }
 
-// Fulcro dell'applicativo che esegue le funzioni citate sopra
-public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
-  start = System.currentTimeMillis();	
-
-  // funzione che va a marcare l'ultima cella inserita dall'avversario
-  // scritta dal prof necessaria per il funzionamento
-  if(MC.length > 0) {
-    MNKCell d = MC[MC.length-1]; 
-    markCell(d.i,d.j);         
-  }
-
-  MNKCell bestCell = null;
-  int beta = Integer.MAX_VALUE-1, alpha = Integer.MIN_VALUE+1;
-  for(MNKCell c : B.getFreeCells()) {
-    markCell(c.i, c.j);
-    // turno dell'avversario -> chiamarlo con -beta -alpha
-    int score = -negaMax(-beta, -alpha, 100);
-    unmarkCell();
-    // if(score >= beta) {
-    //   bestCell = c;
-    //   break;
-    // }
-    if(score > alpha) {
-      bestCell = c;
-      alpha = score;
+  // NOTE: returns null if the time runs out before we can decide a meaningful move
+  private MNKCell negamaxRoot(int searchDepth) {
+    MNKCell bestCell = null;
+    int alpha = MIN, beta = MAX, score;
+    for(int c : getFreeCells()) {
+      markCell(c/minMN, c%minMN);
+      score = -negamax(searchDepth-1, -beta, -alpha, -1);
+      unmarkCell();
+      if(score > alpha && score != -TIMEOUT_VALUE) {
+        alpha = score;
+        bestCell = new MNKCell(c/minMN, c%minMN);
+      }
     }
+    System.out.println(":: depth=" + searchDepth + " best " + alpha + " in [" + alpha + "," + beta + "] -> " + bestCell);
+    return bestCell;
   }
-  // TODO: remove
-  if(bestCell == null) {
-    throw new Error("bestCell is null");
+
+  // Fulcro dell'applicativo che esegue le funzioni citate sopra
+  public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
+    trm = trh = 0;
+    start = System.currentTimeMillis();	
+    System.out.println("computation started");
+
+    // funzione che va a marcare l'ultima cella inserita dall'avversario
+    // scritta dal prof necessaria per il funzionamento
+    if(MC.length > 0) {
+      MNKCell d = MC[MC.length-1]; 
+      markCell(d.i,d.j);         
+    }
+
+    MNKCell bestCell = null, newCell;
+    int searchDepth = 1, maxDepth = B.getFreeCells().length;
+    System.out.println("[---------------------------------------------------------]");
+    while(!isTimeRunningOut() && searchDepth <= maxDepth) {
+      if((newCell = negamaxRoot(searchDepth++)) != null)
+        bestCell = newCell;
+    }
+    // TODO: remove
+    if(bestCell == null) {
+      throw new Error("bestCell is null");
+    }
+    System.out.println("marked " + bestCell);
+    System.out.println("transposition table usage: \t" +tre+"\t" + ((float)tre/TRANSPOSITION_TABLE_LENGTH)*100 + "%\ntransposition table overwrite: \t" + tro +"\t" + ((float)tro/(tre+1))*100 + "%\ntransposition table hits: \t"+trh+"\t" + ((float)trh/(trh+trm+1))*100 + "%\ntransposition table overwrite:\t"+tro+"\t" + ((float)trm/(trh+trm+1))*100 + "%");
+    System.out.println("[---------------------------------------------------------]");
+    markCell(bestCell.i, bestCell.j);
+    return bestCell;
   }
-  System.out.println("found best cell with value (" + alpha + "," + beta + ") at " + bestCell);
-  markCell(bestCell.i, bestCell.j);
-  return bestCell;
-}
-public String playerName() {
-  return "Android";
-}
+  public String playerName() {
+    return "Android";
+  }
 }
