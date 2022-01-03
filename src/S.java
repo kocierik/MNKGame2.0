@@ -32,7 +32,7 @@ public class S implements MNKPlayer {
   private static MNKCellState myCell;
 	private MNKBoard B;
   private int M,N,K, minMN;
-  private static int MAX = 100_000, MIN = -MAX;
+  private static int MAX = 10_000_000, MIN = -MAX;
 
 	private int TIMEOUT;
 	private int TIMEOUT_VALUE = MAX+1;
@@ -80,9 +80,6 @@ public class S implements MNKPlayer {
 		TIMEOUT = timeout_in_secs;	
     currentHash = 0;
 
-    MAX *= M*N;
-    MIN *= M*N;
-
 		zobristTable = new long [M][N][2];
     fillZobristHashes();
     transposition = new int[TRANSPOSITION_TABLE_LENGTH][];
@@ -100,8 +97,8 @@ public class S implements MNKPlayer {
 		MNKGameState state = B.gameState();
 		if(state == MNKGameState.OPEN) return heuristic();
 		else if(state == MNKGameState.DRAW) return 0;
-		else if(state == myWin) return 100_000;
-    else return -100_000;
+		else if(state == myWin) return M*N*1_000;
+    else return -M*N*1_000;
   }
   
   public int heuristic() {
