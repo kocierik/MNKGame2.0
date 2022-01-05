@@ -123,7 +123,7 @@ public class S implements MNKPlayer {
   }
 
   private boolean isTimeRunningOut() {
-    return (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0);
+    return (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(90.0/100.0);
   }
 
   private int currentHashIndex() {
@@ -203,7 +203,7 @@ public class S implements MNKPlayer {
       value = -negamax(searchDepth-1, -beta, -alpha, -color);
       unmarkCell();
       if(value == -TIMEOUT_VALUE)
-        // deliberately don't store anyting in the transposition table
+        // deliberately don't store anything in the transposition table
         return TIMEOUT_VALUE;
 
       if(value >= beta) {
