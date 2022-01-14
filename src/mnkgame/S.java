@@ -1,27 +1,4 @@
-/*
- *  Copyright (C) 2021 Pietro Di Lena
- *  
- *  This file is part of the MNKGame v2.0 software developed for the
- *  students of the course "Algoritmi e Strutture di Dati" first 
- *  cycle degree/bachelor in Computer Science, University of Bologna
- *  A.Y. 2020-2021.
- *
- *  MNKGame is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This  is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this file.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package mnkgame;
-
 
 import java.util.HashSet;
 import java.util.Random;
@@ -37,7 +14,6 @@ public class S implements MNKPlayer {
 	private int TIMEOUT;
 	private int TIMEOUT_VALUE = MAX+1;
 	private long start;
-
 	private Random rand;
 	private SecureRandom random;
 	private long[][][] zobristTable;
@@ -79,7 +55,7 @@ public class S implements MNKPlayer {
 		myCell   = first ? MNKCellState.P1 : MNKCellState.P2;
 		TIMEOUT = timeout_in_secs;	
     currentHash = 0;
-
+    random = new SecureRandom();
 		zobristTable = new long [M][N][2];
     fillZobristHashes();
     transposition = new int[TRANSPOSITION_TABLE_LENGTH][];
@@ -100,6 +76,7 @@ public class S implements MNKPlayer {
 		else if(state == myWin) return M*N*1_000;
     else return -M*N*1_000;
   }
+  
   
   public int heuristic() {
     int v = 0;
@@ -123,7 +100,7 @@ public class S implements MNKPlayer {
   }
 
   private boolean isTimeRunningOut() {
-    return (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(90.0/100.0);
+    return (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(94.0/100.0);
   }
 
   private int currentHashIndex() {
@@ -222,18 +199,20 @@ public class S implements MNKPlayer {
 
 //--------------------------------------------------------------------------------
 // Inizializzazione tabella di zobristTable
-public long random64(){
-  random = new SecureRandom();
-  return random.nextLong();
-}
+// public long random64(){
+//   random = new SecureRandom();
+//   return random.nextLong();
+// }
 
 public void fillZobristHashes(){
-  for (int i = 0; i < M; i++) {
-    for (int j = 0; j < N; j++) {
-      zobristTable[i][j][0] = random64();
-      zobristTable[i][j][1] = random64();
+  new Thread(() ->{
+    for (int i = 0; i < M; i++) {
+      for (int j = 0; j < N; j++) {
+        zobristTable[i][j][0] = random.nextLong();
+        zobristTable[i][j][1] = random.nextLong();
+      }
     }
-  }
+  }).start();
 }
 
   // NOTE: returns null if the time runs out before we can decide a meaningful move
@@ -253,6 +232,27 @@ public void fillZobristHashes(){
     return bestCell;
   }
 
+  MNKCell isLosingCell(MNKCell[] FC){
+		int pos = rand.nextInt(FC.length); 
+		MNKCell p = FC[pos]; 
+		B.markCell(p.i,p.j); 
+		for(int k = 0; k < FC.length; k++) {
+      if(k != pos) { 
+				MNKCell q = FC[k];
+				if(B.markCell(q.i,q.j) == yourWin) {
+					B.unmarkCell();
+					B.unmarkCell();	       
+					B.markCell(q.i,q.j);   
+					return q;							 
+				} else {
+					B.unmarkCell();	       
+				}	
+			}	
+		}
+		B.unmarkCell();
+    return null;	
+  }
+
   // Fulcro dell'applicativo che esegue le funzioni citate sopra
   public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
     trm = trh = 0;
@@ -265,6 +265,16 @@ public void fillZobristHashes(){
       MNKCell d = MC[MC.length-1]; 
       markCell(d.i,d.j);         
     }
+
+    // for(MNKCell d : FC) {
+		// 	if(B.markCell(d.i,d.j) == myWin) return d;  
+		// 	else B.unmarkCell();
+		// }
+    MNKCell a = isLosingCell(FC);
+    if(a != null){
+       System.out.println("ciaoAATTENZIIONE");
+       return a;
+      }
 
     MNKCell bestCell = null, newCell;
     int searchDepth = 1, maxDepth = B.getFreeCells().length;

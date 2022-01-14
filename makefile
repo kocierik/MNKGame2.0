@@ -6,9 +6,9 @@ JVMFLAGS = -cp build
 
 PKG=mnkgame
 MAIN=$(PKG).MNKGame 
-M:=4
-N:=4
-K:=3
+M:=6
+N:=5
+K:=4
 REPS:=5
 TIME:=10
 BEST:=S
