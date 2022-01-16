@@ -10,7 +10,7 @@ public class S implements MNKPlayer {
 	private MNKBoard B;
   private int M,N,K, minMN;
   private static int MAX = 10_000_000, MIN = -MAX;
-
+  private static MNKCell lastMarked;
 	private int TIMEOUT;
 	private int TIMEOUT_VALUE = MAX+1;
 	private long start;
@@ -77,16 +77,63 @@ public class S implements MNKPlayer {
     else return -M*N*1_000;
   }
   
-  
-  public int heuristic() {
-    int v = 0;
-    for (int i = 0; i < M; i++) {
-      for (int j = 0; j < N; j++) {
-        v += B.cellState(i,j) == myCell ? 1 : -1;
-      }
+// | | | | | | | 
+// | | |x| | | |
+// |A|x| |x| | |
+// | |x|o| | | |
+// | |x|x|x| | |
+// | | | | | | |
+
+
+
+
+// mettiamo in un array le celle libere adiacenti all'ultima cella marcata da noi
+public MNKCell[] getNearFreeCell() {
+	 MNKCell[] arrayFC = new MNKCell[8];
+	int i, j;
+  i = lastMarked.i;
+  j = lastMarked.j;
+  //arrayFC[0] sotto
+  if(i+1 < B.M && B.cellState(i+1,j) != MNKCellState.P2) arrayFC[0] = new MNKCell(i+1,j);
+  // arrayFC[1] destra
+  if(j+1 < B.N && B.cellState(i,j+1) != MNKCellState.P2) arrayFC[1] =new MNKCell(i,j+1);
+  // arrayFC[2] sopra
+  if(i-1 >= 0 && B.cellState(i-1,j) != MNKCellState.P2) arrayFC[2] = new MNKCell(i-1,j);
+  // arrayFC[3] sinistra
+  if(j-1 >= 0 && B.cellState(i,j-1) != MNKCellState.P2 ) arrayFC[3] =new MNKCell(i,j-1);
+  // arrayFC[1] sotto dx
+  if(i+1 < B.M && j+1 < B.N && B.cellState(i+1,j+1) != MNKCellState.P2) arrayFC[4] = new MNKCell(i+1,j+1);
+  //arrayFC[7] sotto sx
+  if(i+1 < B.M && j-1 >= 0 && B.cellState(i+1,j-1) != MNKCellState.P2) arrayFC[5] = new MNKCell(i+1,j-1);
+  //arrayFC[6] sopra dx
+  if(i-1 >= 0 && j+1 < B.N && B.cellState(i-1,j+1) != MNKCellState.P2) arrayFC[6] = new MNKCell(i-1,j+1);
+  //arrayFC[7] sopra sx
+  if(i-1 >= 0 && j-1 >= 0 && B.cellState(i-1,j-1) != MNKCellState.P2) arrayFC[7] = new MNKCell(i-1,j-1);
+
+	return arrayFC;
+}
+
+public int heuristic() {
+  int i = lastMarked.i;
+  int j = lastMarked.j;
+  //per ogni cella adiacente a lastMarked?
+  //i=0
+  for (MNKCell nearFreeCell : getNearFreeCell()) {  
+    for(int z=1;z<K;z++){
+      
     }
-    return v;
+    //i++
   }
+}
+  // public int heuristic() {
+  //   int v = 0;
+  //   for (int i = 0; i < M; i++) {
+  //     for (int j = 0; j < N; j++) {
+  //       v += B.cellState(i,j) == myCell ? 1 : -1;
+  //     }
+  //   }
+  //   return v;
+  // }
 
   private long currentHash;
   private MNKGameState markCell(int i, int j) {
@@ -266,13 +313,12 @@ public void fillZobristHashes(){
       markCell(d.i,d.j);         
     }
 
-    // for(MNKCell d : FC) {
-		// 	if(B.markCell(d.i,d.j) == myWin) return d;  
-		// 	else B.unmarkCell();
-		// }
+    for(MNKCell d : FC) {
+			if(B.markCell(d.i,d.j) == myWin) return d; 
+			else B.unmarkCell();
+		}
     MNKCell a = isLosingCell(FC);
     if(a != null){
-       System.out.println("ciaoAATTENZIIONE");
        return a;
       }
 
@@ -283,6 +329,8 @@ public void fillZobristHashes(){
       if((newCell = negamaxRoot(searchDepth++)) != null)
         bestCell = newCell;
     }
+    lastMarked = bestCell;
+
     // TODO: remove
     if(bestCell == null) {
       throw new Error("bestCell is null");
@@ -296,4 +344,7 @@ public void fillZobristHashes(){
   public String playerName() {
     return "Android";
   }
+
+
+
 }
