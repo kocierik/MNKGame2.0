@@ -1,6 +1,7 @@
 package mnkgame;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
 import java.security.*;
 public class S implements MNKPlayer {
@@ -23,6 +24,8 @@ public class S implements MNKPlayer {
   private static int TRANSPOSITION_ENTRY_NOT_FOUND = Integer.MAX_VALUE;
   private static int TRANSPOSITION_KIND_EXACT = 0,
     TRANSPOSITION_KIND_LOWER = -1, TRANSPOSITION_KIND_UPPER = 1;
+  private static int[] times_score = new int[8];
+        
   // transposition entry structure: [
   // first 32 bits of the hash key, 
   // last 32 bits of the hash key, 
@@ -77,16 +80,6 @@ public class S implements MNKPlayer {
     else return -M*N*1_000;
   }
   
-// | | | | | | | 
-// | | |x| | | |
-// |A|x| |x| | |
-// | |x|o| | | |
-// | |x|x|x| | |
-// | | | | | | |
-
-
-
-
 // mettiamo in un array le celle libere adiacenti all'ultima cella marcata da noi
 public MNKCell[] getNearFreeCell() {
 	 MNKCell[] arrayFC = new MNKCell[8];
@@ -94,46 +87,201 @@ public MNKCell[] getNearFreeCell() {
   i = lastMarked.i;
   j = lastMarked.j;
   //arrayFC[0] sotto
-  if(i+1 < B.M && B.cellState(i+1,j) != MNKCellState.P2) arrayFC[0] = new MNKCell(i+1,j);
+  for(int depth=1;depth<K;depth++){
+    if(i+depth < B.M && B.cellState(i+depth,j) == MNKCellState.FREE){
+        arrayFC[0] = new MNKCell(i+depth,j);
+        times_score[0]++;
+        break;
+    }
+    if(i+depth< B.M && B.cellState(i+depth,j) != MNKCellState.P2)
+      break;
+    times_score[0]++;
+  }
   // arrayFC[1] destra
-  if(j+1 < B.N && B.cellState(i,j+1) != MNKCellState.P2) arrayFC[1] =new MNKCell(i,j+1);
+  //if(j+1 < B.N && B.cellState(i,j+1) != MNKCellState.P2) arrayFC[1] =new MNKCell(i,j+1);
+  for(int depth=1;depth<K;depth++){
+    if(j+depth < B.N && B.cellState(i,j+depth) != MNKCellState.FREE){
+        arrayFC[1] = new MNKCell(i,j+depth);
+        times_score[1]++;
+        break;
+    }
+    if(j+depth < B.N && B.cellState(i,j+depth) != MNKCellState.P2)
+      break;
+    times_score[1]++;
+  }
   // arrayFC[2] sopra
-  if(i-1 >= 0 && B.cellState(i-1,j) != MNKCellState.P2) arrayFC[2] = new MNKCell(i-1,j);
+  //if(i-1 >= 0 && B.cellState(i-1,j) != MNKCellState.P2) arrayFC[2] = new MNKCell(i-1,j);
+  for(int depth=1;depth<K;depth++){
+    if(i-depth >= 0 && B.cellState(i-depth,j) != MNKCellState.FREE){
+        arrayFC[2] = new MNKCell(i-depth,j);
+        times_score[2]++;
+        break;
+    }
+    if(i-depth >= 0 && B.cellState(i-depth,j) != MNKCellState.P2)
+      break;
+    times_score[2]++;
+  }
   // arrayFC[3] sinistra
-  if(j-1 >= 0 && B.cellState(i,j-1) != MNKCellState.P2 ) arrayFC[3] =new MNKCell(i,j-1);
-  // arrayFC[1] sotto dx
-  if(i+1 < B.M && j+1 < B.N && B.cellState(i+1,j+1) != MNKCellState.P2) arrayFC[4] = new MNKCell(i+1,j+1);
-  //arrayFC[7] sotto sx
-  if(i+1 < B.M && j-1 >= 0 && B.cellState(i+1,j-1) != MNKCellState.P2) arrayFC[5] = new MNKCell(i+1,j-1);
+  //if(j-1 >= 0 && B.cellState(i,j-1) != MNKCellState.P2 ) arrayFC[3] =new MNKCell(i,j-1);
+  for(int depth=1;depth<K;depth++){
+    if(j-depth >= 0 && B.cellState(i,j-depth) != MNKCellState.FREE){
+        arrayFC[3] = new MNKCell(i,j-depth);
+        times_score[3]++;
+        break;
+    }
+    if(j-depth >= 0 && B.cellState(i,j-depth) != MNKCellState.P2)
+      break;
+    times_score[3]++;
+  }
+  // arrayFC[4] sotto dx
+  //if(i+1 < B.M && j+1 < B.N && B.cellState(i+1,j+1) != MNKCellState.P2) arrayFC[4] = new MNKCell(i+1,j+1);
+  for(int depth=1;depth<K;depth++){
+    if(i+depth < B.M && j+depth < B.N && B.cellState(i+depth,j+depth) != MNKCellState.FREE){
+        arrayFC[4] = new MNKCell(i+depth,j+depth);
+        times_score[4]++;
+        break;
+    }
+    if(i+depth < B.M && j+depth < B.N && B.cellState(i+depth,j+depth) != MNKCellState.P2)
+      break;
+    times_score[4]++;
+  }
+  //arrayFC[5] sotto sx
+  //if(i+1 < B.M && j-1 >= 0 && B.cellState(i+1,j-1) != MNKCellState.P2) arrayFC[5] = new MNKCell(i+1,j-1);
+  for(int depth=1;depth<K;depth++){
+    if(i+depth < B.M && j-depth >= 0 && B.cellState(i+depth,j-depth) != MNKCellState.FREE){
+        arrayFC[5] = new MNKCell(i+depth,j-depth);
+        times_score[5]++;
+        break;
+    }
+    if(i+depth < B.M && j-depth >= 0 && B.cellState(i+depth,j-depth) != MNKCellState.P2)
+      break;
+    times_score[5]++;
+  }
   //arrayFC[6] sopra dx
-  if(i-1 >= 0 && j+1 < B.N && B.cellState(i-1,j+1) != MNKCellState.P2) arrayFC[6] = new MNKCell(i-1,j+1);
-  //arrayFC[7] sopra sx
-  if(i-1 >= 0 && j-1 >= 0 && B.cellState(i-1,j-1) != MNKCellState.P2) arrayFC[7] = new MNKCell(i-1,j-1);
+  // if(i-1 >= 0 && j+1 < B.N && B.cellState(i-1,j+1) != MNKCellState.P2) arrayFC[6] = new MNKCell(i-1,j+1);
+  for(int depth=1;depth<K;depth++){
+    if(i-depth >= 0 && j+depth < B.N && B.cellState(i-depth,j+depth) == MNKCellState.FREE){
+        arrayFC[6] = new MNKCell(i-depth,j+depth);
+        times_score[6]++;
+        break;
+    }
+    if(i-depth >= 0 && j+depth < B.N && B.cellState(i+depth,j+depth) != MNKCellState.P2)
+      break;
+    times_score[6]++;
+  }
+  // //arrayFC[7] sopra sx
+  // if(i-1 >= 0 && j-1 >= 0 && B.cellState(i-1,j-1) != MNKCellState.P2) arrayFC[7] = new MNKCell(i-1,j-1);
+  for(int depth=1;depth<K;depth++){
+    if(i-depth >= 0 && j-depth >= 0 && B.cellState(i-depth,j-depth) == MNKCellState.FREE){
+        arrayFC[7] = new MNKCell(i-depth,j-depth);
+        times_score[7]++;
+        break;
+    }
+    if(i-depth >= 0 && j-depth >= 0 && B.cellState(i-depth,j-depth) != MNKCellState.P2)
+      break;
+    times_score[7]++;
+  }
 
 	return arrayFC;
 }
 
-public int heuristic() {
-  int i = lastMarked.i;
-  int j = lastMarked.j;
-  //per ogni cella adiacente a lastMarked?
-  //i=0
-  for (MNKCell nearFreeCell : getNearFreeCell()) {  
-    for(int z=1;z<K;z++){
-      
-    }
-    //i++
+public int depthCell(int i, int j, int diri, int dirj){
+  int res=0;
+  for(int z=1;z<K;z++){
+    if(B.cellState(i+z*diri,j+z*dirj) != MNKCellState.P2)
+      res++;
+  }
+  return res;
+}
+
+
+public class InnerS {
+  private int i;
+  private int j;
+  private int score;
+  public InnerS(int i, int j, int score){
+    this.i = i;
+    this.j = j;
+    this.score = score;
   }
 }
-  // public int heuristic() {
-  //   int v = 0;
-  //   for (int i = 0; i < M; i++) {
-  //     for (int j = 0; j < N; j++) {
-  //       v += B.cellState(i,j) == myCell ? 1 : -1;
-  //     }
-  //   }
-  //   return v;
-  // }
+
+
+public void heuristic() {
+  //ciclo che mette in un array tutte le celle da analizzare (ovvero le celle adiacenti alle celle marcate da noi)
+  //getNearFreeCell(cella[][])
+  HashSet<InnerS> nearFreeCell = new HashSet<InnerS>();
+  InnerS v;
+  //analizziamo tutte le celle adiacenti a quelle marcate da noi
+  //dobbiamo ritornare tra TUTTE le celle adiacenti quella con score maggiore
+  for (MNKCell cell : B.getMarkedCells()) {
+    if(cell.state == MNKCellState.P1){
+      //controlla possibili disposizioni vincenti nelle 4 direzioni
+      int down=0,up=0,right=0,left=0,diagUR=0,diagUL=0,diagDR=0,diagDL=0;
+      int [] score = new int[8];
+      MNKCell[] arrayFC = getNearFreeCell();
+      if(arrayFC[0]!=null)
+        down = depthCell(arrayFC[0].i,arrayFC[0].j,1,0);
+      if(arrayFC[1]!=null)
+        right = depthCell(arrayFC[1].i,arrayFC[1].j,0,1);
+      if(arrayFC[2]!=null)
+        up = depthCell(arrayFC[2].i,arrayFC[2].j,-1,0);
+      if(arrayFC[3]!=null)
+        left = depthCell(arrayFC[3].i,arrayFC[3].j,0,-1);
+      if(arrayFC[4]!=null)
+        diagDR = depthCell(arrayFC[4].i,arrayFC[4].j,1,1);
+      if(arrayFC[5]!=null)
+        diagDL = depthCell(arrayFC[5].i,arrayFC[5].j,1,-1);
+      if(arrayFC[6]!=null)
+        diagUR = depthCell(arrayFC[6].i,arrayFC[6].j,-1,1);
+      if(arrayFC[7]!=null)
+        diagUL = depthCell(arrayFC[7].i,arrayFC[7].j,-1,-1);
+      
+      if(down==K-1) score[0] += 1 ;
+      if(up==K-1) score[2] += 1;
+      if(up+down>=K-1){
+        score[0] += 1;
+        score[2] += 1;
+      }
+      if(right==K-1) score[1] += 1 ;
+      if(left==K-1) score[3] += 1;
+      if(left+right>=K-1){
+        score[1] += 1;
+        score[3] += 1;
+      }
+      if(diagUL==K-1) score[7] += 1;
+      if(diagUR==K-1) score[6] += 1;
+      if(diagUR+diagUL>=K-1){
+        score[6] += 1;
+        score[7] += 1;
+      }
+      if(diagDR==K-1) score[4] += 1 ;
+      if(diagDL==K-1) score[5] += 1;
+      if(up+diagDR>=K-1){
+        score[4] += 1;
+        score[5] += 1;
+      }
+      //scorriamo hashset per verificare che la cella non ci sia gia. Se c'è gia aggiorniamo solo lo score, se no aggiungiamo la cella con il suo score
+      for(int z=0;z<8;z++){
+        Iterator<InnerS> it;
+        it=nearFreeCell.iterator();
+        Boolean found = false;
+        while(it.hasNext()) {
+          v = it.next();
+          if(v.i==arrayFC[z].i && v.j==arrayFC[z].j){
+            v.score += score[z]*times_score[z];
+            found = true;
+          }
+        }
+        if(!found){
+          InnerS c = new InnerS(arrayFC[z].i,arrayFC[z].j,score[z]*times_score[z]);
+          nearFreeCell.add(c);
+        }
+      }
+    }
+  }
+  //TODO: scorrere HashSet e ritornare cella con valore piu alto
+}
 
   private long currentHash;
   private MNKGameState markCell(int i, int j) {
