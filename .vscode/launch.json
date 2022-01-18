@@ -8,19 +8,12 @@
       "type": "java",
       "name": "Launch MNKGame",
       "request": "launch",
-      "mainClass": "src.MNKGame",
-      "projectName": "MNKGame2.0_8af27798"
-    },
-    {
-      "type": "java",
-      "name": "Launch MNKGame",
-      "request": "launch",
       "mainClass": "mnkgame.MNKGame",
-      "projectName": "MNKGame2.0_7ad60b8b",
+      "projectName": "MNKGame2.0_8af27798",
       "args": [
-        7,
-        7,
-        4,
+        "7",
+        "7",
+        "4",
         "mnkgame.S"
       ]
     }

@@ -3,10 +3,9 @@ JCFLAGS = -cp src -d build
 JC = javac
 JVM= java 
 JVMFLAGS = -cp build
-
 PKG=mnkgame
 MAIN=$(PKG).MNKGame 
-M:=6
+M:=5
 N:=5
 K:=4
 REPS:=5
@@ -14,13 +13,13 @@ TIME:=10
 BEST:=S
 OLD:=old
 
+.SUFFIXES: .java .class
+.PHONY: build
+
 best: build
-	$(JVM) $(JVMFLAGS) $(MAIN) $(M) $(N) $(K) $(PKG).$(BEST)
+	$(JVM) $(JVMFLAGS) $(MAIN) $(M) $(N) $(K) mnkgame.$(BEST)
 
-test1: build
-	$(JVM) $(JVMFLAGS) mnkgame.MNKPlayerTester $(M) $(N) $(K) $(OLD) $(PKG).$(BEST) -v -r $(REPS)
-
-build: $(CLASSES)
+build: 
 	mkdir -p build
 	$(JC) $(JCFLAGS) src/mnkgame/*.java src/mnkgame/*.java
 

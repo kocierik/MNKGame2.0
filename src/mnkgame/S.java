@@ -72,9 +72,14 @@ public class S implements MNKPlayer {
 		10 = vittoria
 		-10 = sconfitta
 	*/
+  int value;
 	public int evaluate() {
 		MNKGameState state = B.gameState();
-		if(state == MNKGameState.OPEN) return heuristic();
+		if(state == MNKGameState.OPEN){
+      value =  heuristic();
+      System.out.println("valore dell'euristica = " + value);
+      return value;
+    }
 		else if(state == MNKGameState.DRAW) return 0;
 		else if(state == myWin) return M*N*1_000;
     else return -M*N*1_000;
@@ -82,15 +87,15 @@ public class S implements MNKPlayer {
 
 public int longSeriesBonus(int n, int consecutive, int marked){
   if(n>=K){
-    if(consecutive == K-1) return 10_000_000; //10M
-    if(consecutive == K-2) return 100_000;    //100k
-    if(consecutive == K-3) return 1_000;      //1k
-    else return (marked/n) * 1_000;
+    if(consecutive == K-1) return 1_000; //1k
+    if(consecutive == K-2) return 100;   //100
+    if(consecutive == K-3) return 10;    //10
+    else return (marked/n) * 100;
   }
   return 0;
 }
 
-//sequenza finale, aggiungere marked longSeriesBonus
+//player 1 = io, player 2 = nemico
 public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
   int value = 0;
   //last_player è 1 o 2
@@ -436,6 +441,7 @@ public void fillZobristHashes(){
 			if(B.markCell(d.i,d.j) == myWin) return d; 
 			else B.unmarkCell();
 		}
+    
     MNKCell a = isLosingCell(FC);
     if(a != null){
        return a;
