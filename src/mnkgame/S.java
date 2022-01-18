@@ -437,6 +437,12 @@ public void fillZobristHashes(){
       markCell(d.i,d.j);         
     }
 
+    // Inizia sempre al centro
+    if(MC.length == 0 ){
+      B.markCell(M/2, N/2);
+      return new MNKCell(M/2, N/2);
+    }
+
     for(MNKCell d : FC) {
 			if(B.markCell(d.i,d.j) == myWin) return d; 
 			else B.unmarkCell();
