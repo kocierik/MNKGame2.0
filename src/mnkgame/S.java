@@ -194,87 +194,89 @@ public int heuristic() {
   }
   int maxLen = minMN;
   int nMaxDiag = Math.abs(M-N)+1;
-  //diagonal
-  if(M>=N){
-    for (j = 1; j < N; j++) {
-      if(maxLen-j>=K){
-        i = 0;
-        value += depthCell(i,j,1,1,maxLen-j);
+  if(maxLen>=K){
+    //diagonal
+    if(M>=N){
+      for (j = 1; j < N; j++) {
+        if(maxLen-j>=K){
+          i = 0;
+          value += depthCell(i,j,1,1,maxLen-j);
+        }
+        else break;
       }
-      else break;
+      for(i = 0; i < M; i++){
+        if(i<nMaxDiag){
+          j = 0;
+          value += depthCell(i,j,1,1,maxLen);
+        }
+        else if(maxLen-(i+1-nMaxDiag)>=K){
+          j = 0;
+          value += depthCell(i,j,1,1,maxLen-(i+1-nMaxDiag));
+        }
+        else break;
+      }
     }
-    for(i = 0; i < M; i++){
-      if(i<nMaxDiag){
-        j = 0;
-        value += depthCell(i,j,1,1,maxLen);
+    else{
+      for (j = 0; j < N; j++) {
+        if(j<nMaxDiag){
+          i = 0;
+          value += depthCell(i,j,1,1,maxLen);
+        }
+        else if(maxLen-(j+1-nMaxDiag)>=K){
+          i = 0;
+          value += depthCell(i,j,1,1,maxLen-(j+1-nMaxDiag));
+        }
+        else break;
       }
-      else if(maxLen-(i+1-nMaxDiag)>=K){
-        j = 0;
-        value += depthCell(i,j,1,1,maxLen-(i+1-nMaxDiag));
+      for(i = 1; i < M; i++){
+        if(maxLen-i>=K){
+          j = 0;
+          value += depthCell(i,j,1,1,maxLen-i);
+        }
+        else break;
       }
-      else break;
     }
-  }
-  else{
-    for (j = 0; j < N; j++) {
-      if(j<nMaxDiag){
-        i = 0;
-        value += depthCell(i,j,1,1,maxLen);
+    
+    //antidiagonal
+    if(M>=N){
+      for(j = N-2; j >= 0; j--) {
+        if(maxLen-(N-j-1)>=K){
+          i = 0;
+          value += depthCell(i,j,1,-1,maxLen-(N-j-1));
+        }
+        else break;
       }
-      else if(maxLen-(j+1-nMaxDiag)>=K){
-        i = 0;
-        value += depthCell(i,j,1,1,maxLen-(j+1-nMaxDiag));
+      for(i = 0; i < M; i++){
+        if(i<nMaxDiag){
+          j = N-1;
+          value += depthCell(i,j,1,-1,maxLen);
+        }
+        else if(maxLen-(i+1-nMaxDiag)>=K){
+          j = N-1;
+          value += depthCell(i,j,1,-1,maxLen-(i+1-nMaxDiag));
+        }
+        else break;
       }
-      else break;
     }
-    for(i = 1; i < M; i++){
-      if(maxLen-i>=K){
-        j = 0;
-        value += depthCell(i,j,1,1,maxLen-i);
+    else{
+      for (j = N-1; j >= 0; j--) {
+        if(N-j-1 < nMaxDiag){
+          i = 0;
+          value += depthCell(i,j,1,-1,maxLen);
+        }
+        else if(maxLen-(N-j-nMaxDiag)>=K){
+          i = 0;
+          value += depthCell(i,j,1,-1,maxLen-(N-j-nMaxDiag));
+        }
+        else break;
       }
-      else break;
-    }
-  }
-  
-  //antidiagonal
-  if(M>=N){
-    for(j = N-2; j >= 0; j--) {
-      if(maxLen-(N-j-1)>=K){
-        i = 0;
-        value += depthCell(i,j,1,-1,maxLen-(N-j-1));
+      for(i = 1; i < M; i++){
+        if(maxLen-i>=K){
+          j = N-1;
+          value += depthCell(i,j,1,-1,maxLen-i);
+        }
+        else break;
       }
-      else break;
-    }
-    for(i = 0; i < M; i++){
-      if(i<nMaxDiag){
-        j = N-1;
-        value += depthCell(i,j,1,-1,maxLen);
-      }
-      else if(maxLen-(i+1-nMaxDiag)>=K){
-        j = N-1;
-        value += depthCell(i,j,1,-1,maxLen-(i+1-nMaxDiag));
-      }
-      else break;
-    }
-  }
-  else{
-    for (j = N-1; j >= 0; j--) {
-      if(N-j-1 < nMaxDiag){
-        i = 0;
-        value += depthCell(i,j,1,-1,maxLen);
-      }
-      else if(maxLen-(N-j-nMaxDiag)>=K){
-        i = 0;
-        value += depthCell(i,j,1,-1,maxLen-(N-j-nMaxDiag));
-      }
-      else break;
-    }
-    for(i = 1; i < M; i++){
-      if(maxLen-i>=K){
-        j = N-1;
-        value += depthCell(i,j,1,-1,maxLen-i);
-      }
-      else break;
     }
   }
   return value;
