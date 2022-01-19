@@ -80,7 +80,7 @@ public class S implements MNKPlayer {
 		MNKGameState state = B.gameState();
 		if(state == MNKGameState.OPEN){
       value =  heuristic();
-      System.out.println("valore dell'euristica = " + value);
+      // System.out.println("valore dell'euristica = " + value);
       return value;
     }
 		else if(state == MNKGameState.DRAW) return 0;
@@ -99,10 +99,13 @@ public class S implements MNKPlayer {
 // }
 public int seriesBonus(int n, int consecutive, int marked){
   if(n>=K){
-    if(consecutive >= K-1) return 100_000 + ((marked-consecutive)/(n-consecutive)*1000);
-    if(consecutive >= K-2) return 10_000 + ((marked-consecutive)/(n-consecutive)*100);
-    if(consecutive >= K-3) return 1_000 + ((marked-consecutive)/(n-consecutive)*10);
-    else return (marked/n) * 1_000;
+    if(consecutive >= K-1) return 1_000_000 + marked^2;
+    if(consecutive >= K-2) return 50_000 + marked^2;
+    if(consecutive >= K-3) return 500 + marked^2;
+    else {
+      System.out.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+      return (marked/n) * 1_000 + marked^2;
+    }
   }
   return 0;
 }
@@ -120,16 +123,19 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
     if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.P1){
       if(lastPlayer==2){
         value -= seriesBonus(c2series, maxSeries, marked);
-        maxSeries = 0;
         c2series = 0;
         c1series = 1 + lastFreeSeries;
+        maxSeries = 1;
         marked = 1;
       }
       else{
-        if(prev==1) series++;
-        else{
+        if(prev==1){
+          series++;
           if(series>maxSeries) maxSeries = series;
+        }
+        else{
           series = 1;
+          maxSeries = series;
         }
         marked++;
         c1series++;
@@ -144,16 +150,19 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
     else if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.P2){
       if(lastPlayer==1){
         value += seriesBonus(c1series, maxSeries, marked);
-        maxSeries = 0;
         c1series = 0;
         c2series = 1 + lastFreeSeries;
+        maxSeries = 1;
         marked = 1;
       }
       else{
-        if(prev==2) series++;
-        else {
+        if(prev==2) {
+          series++;
           if(series>maxSeries) maxSeries = series;
+        }
+        else {
           series = 1;
+          maxSeries = series;
         }
         marked++;
         c2series++;
@@ -189,109 +198,110 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
 }
 
 public int heuristic() {
-  int i = 0, j = 0, value = 0;
-  //row
-  if(N >= K){
-    for (i = 0; i < M; i++) {
-      j = 0;
-      value += depthCell(i,j,0,1,N);
-    }
-  }
-  //column
-  if(M >= K){
-    for (j = 0; j < N; j++) {
-      i = 0;
-      value += depthCell(i,j,1,0,M);
-    }
-  }
-  int maxLen = minMN;
-  int nMaxDiag = Math.abs(M-N)+1;
-  if(maxLen>=K){
-    //diagonal
-    if(M>=N){
-      for (j = 1; j < N; j++) {
-        if(maxLen-j>=K){
-          i = 0;
-          value += depthCell(i,j,1,1,maxLen-j);
-        }
-        else break;
-      }
-      for(i = 0; i < M; i++){
-        if(i<nMaxDiag){
-          j = 0;
-          value += depthCell(i,j,1,1,maxLen);
-        }
-        else if(maxLen-(i+1-nMaxDiag)>=K){
-          j = 0;
-          value += depthCell(i,j,1,1,maxLen-(i+1-nMaxDiag));
-        }
-        else break;
+    int i = 0, j = 0, value = 0;
+    //row
+    if(N >= K){
+      for (i = 0; i < M; i++) {
+        j = 0;
+        value += depthCell(i,j,0,1,N);
       }
     }
-    else{
+    //column
+    if(M >= K){
       for (j = 0; j < N; j++) {
-        if(j<nMaxDiag){
-          i = 0;
-          value += depthCell(i,j,1,1,maxLen);
-        }
-        else if(maxLen-(j+1-nMaxDiag)>=K){
-          i = 0;
-          value += depthCell(i,j,1,1,maxLen-(j+1-nMaxDiag));
-        }
-        else break;
-      }
-      for(i = 1; i < M; i++){
-        if(maxLen-i>=K){
-          j = 0;
-          value += depthCell(i,j,1,1,maxLen-i);
-        }
-        else break;
+        i = 0;
+        value += depthCell(i,j,1,0,M);
       }
     }
-    
-    //antidiagonal
-    if(M>=N){
-      for(j = N-2; j >= 0; j--) {
-        if(maxLen-(N-j-1)>=K){
-          i = 0;
-          value += depthCell(i,j,1,-1,maxLen-(N-j-1));
+    int maxLen = minMN;
+    int nMaxDiag = Math.abs(M-N)+1;
+    if(maxLen>=K){
+      //diagonal
+      if(M>=N){
+        for (j = 1; j < N; j++) {
+          if(maxLen-j>=K){
+            i = 0;
+            value += depthCell(i,j,1,1,maxLen-j);
+          }
+          else break;
         }
-        else break;
+        for(i = 0; i < M; i++){
+          if(i<nMaxDiag){
+            j = 0;
+            value += depthCell(i,j,1,1,maxLen);
+          }
+          else if(maxLen-(i+1-nMaxDiag)>=K){
+            j = 0;
+            value += depthCell(i,j,1,1,maxLen-(i+1-nMaxDiag));
+          }
+          else break;
+        }
       }
-      for(i = 0; i < M; i++){
-        if(i<nMaxDiag){
-          j = N-1;
-          value += depthCell(i,j,1,-1,maxLen);
+      else{
+        for (j = 0; j < N; j++) {
+          if(j<nMaxDiag){
+            i = 0;
+            value += depthCell(i,j,1,1,maxLen);
+          }
+          else if(maxLen-(j+1-nMaxDiag)>=K){
+            i = 0;
+            value += depthCell(i,j,1,1,maxLen-(j+1-nMaxDiag));
+          }
+          else break;
         }
-        else if(maxLen-(i+1-nMaxDiag)>=K){
-          j = N-1;
-          value += depthCell(i,j,1,-1,maxLen-(i+1-nMaxDiag));
+        for(i = 1; i < M; i++){
+          if(maxLen-i>=K){
+            j = 0;
+            value += depthCell(i,j,1,1,maxLen-i);
+          }
+          else break;
         }
-        else break;
+      }
+      
+      //antidiagonal
+      if(M>=N){
+        for(j = N-2; j >= 0; j--) {
+          if(maxLen-(N-j-1)>=K){
+            i = 0;
+            value += depthCell(i,j,1,-1,maxLen-(N-j-1));
+          }
+          else break;
+        }
+        for(i = 0; i < M; i++){
+          if(i<nMaxDiag){
+            j = N-1;
+            value += depthCell(i,j,1,-1,maxLen);
+          }
+          else if(maxLen-(i+1-nMaxDiag)>=K){
+            j = N-1;
+            value += depthCell(i,j,1,-1,maxLen-(i+1-nMaxDiag));
+          }
+          else break;
+        }
+      }
+      else{
+        for (j = N-1; j >= 0; j--) {
+          if(N-j-1 < nMaxDiag){
+            i = 0;
+            value += depthCell(i,j,1,-1,maxLen);
+          }
+          else if(maxLen-(N-j-nMaxDiag)>=K){
+            i = 0;
+            value += depthCell(i,j,1,-1,maxLen-(N-j-nMaxDiag));
+          }
+          else break;
+        }
+        for(i = 1; i < M; i++){
+          if(maxLen-i>=K){
+            j = N-1;
+            value += depthCell(i,j,1,-1,maxLen-i);
+          }
+          else break;
+        }
       }
     }
-    else{
-      for (j = N-1; j >= 0; j--) {
-        if(N-j-1 < nMaxDiag){
-          i = 0;
-          value += depthCell(i,j,1,-1,maxLen);
-        }
-        else if(maxLen-(N-j-nMaxDiag)>=K){
-          i = 0;
-          value += depthCell(i,j,1,-1,maxLen-(N-j-nMaxDiag));
-        }
-        else break;
-      }
-      for(i = 1; i < M; i++){
-        if(maxLen-i>=K){
-          j = N-1;
-          value += depthCell(i,j,1,-1,maxLen-i);
-        }
-        else break;
-      }
-    }
-  }
-  return value;
+    System.out.println("COMPRESO: "+(value>=MIN&&value<=MAX));
+    return value;
 }
 
   private long currentHash;
