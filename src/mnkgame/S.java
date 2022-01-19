@@ -3,6 +3,9 @@ package mnkgame;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
+
+import javax.security.auth.x500.X500Principal;
+
 import java.security.*;
 public class S implements MNKPlayer {
 	private static MNKGameState myWin;
@@ -85,11 +88,20 @@ public class S implements MNKPlayer {
     else return -M*N*1_000;
   }
 
+// public int seriesBonus(int n, int consecutive, int marked){
+//   if(n>=K){
+//     if(consecutive == K-1) return 100_000;  //100k
+//     if(consecutive == K-2) return 10_000;   //10k
+//     if(consecutive == K-3) return 1_000;    //1k
+//     else return (marked/n) * 1_000;
+//   }
+//   return 0;
+// }
 public int seriesBonus(int n, int consecutive, int marked){
   if(n>=K){
-    if(consecutive == K-1) return 100_000;  //100k
-    if(consecutive == K-2) return 10_000;   //10k
-    if(consecutive == K-3) return 1_000;    //1k
+    if(consecutive >= K-1) return 100_000 + ((marked-consecutive)/(n-consecutive)*1000);
+    if(consecutive >= K-2) return 10_000 + ((marked-consecutive)/(n-consecutive)*100);
+    if(consecutive >= K-3) return 1_000 + ((marked-consecutive)/(n-consecutive)*10);
     else return (marked/n) * 1_000;
   }
   return 0;
@@ -471,10 +483,10 @@ public void fillZobristHashes(){
 			else B.unmarkCell();
 		}
     
-    // MNKCell a = isLosingCell(FC);
-    // if(a != null){
-    //    return a;
-    //   }
+    MNKCell a = isLosingCell(FC);
+    if(a != null){
+       return a;
+      }
 
     MNKCell bestCell = null, newCell;
     int searchDepth = 1, maxDepth = B.getFreeCells().length;
