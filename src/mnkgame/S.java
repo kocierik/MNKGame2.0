@@ -87,12 +87,12 @@ public class S implements MNKPlayer {
 
 public int seriesBonus(int n, int consecutive, int marked){
   if(n>=K){
-    if(consecutive == K-1) return 1_000; //1k
-    if(consecutive == K-2) return 100;   //100
-    if(consecutive == K-3) return 10;    //10
-    else return (marked/n) * 1000;
+    if(consecutive == K-1) return 10_000;  //10k
+    if(consecutive == K-2) return 1_000;   //1k
+    if(consecutive == K-3) return 100;     //100
+    else return (marked/n) * 1_000;
   }
-  return 0;
+  return -(marked/n)*100;
 }
 
 //player 1 = io, player 2 = nemico
@@ -100,6 +100,7 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
   int value = 0;
   //last_player è 1 o 2
   int lastPlayer = 0;
+  // prev è 0, 1 o 2
   int prev = -1;
   int marked = 0, series = 0, maxSeries = 0;
   int c1series = 0, c2series = 0, lastFreeSeries = 0;
@@ -124,7 +125,7 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
       lastFreeSeries = 0;
       lastPlayer = 1;
       prev = 1;
-      if(z == maxIter){
+      if(z >= maxIter-1){
         value += seriesBonus(c1series, maxSeries, marked);
       }
     }
@@ -148,7 +149,7 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
       lastFreeSeries = 0;
       lastPlayer = 2;
       prev = 2;
-      if(z == maxIter){
+      if(z >= maxIter-1){
         value += seriesBonus(c2series, maxSeries, marked);
       }
     }
@@ -164,27 +165,28 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
       }
       else lastFreeSeries = 1;
 
-      if(z == maxIter){
+      prev = 0;
+      if(z >= maxIter-1){
         if(lastPlayer == 1) value += seriesBonus(c1series, maxSeries, marked);
-        else value += seriesBonus(c2series, maxSeries, marked);
+        else if(lastPlayer == 2) value -= seriesBonus(c2series, maxSeries, marked);
+        else value = 0;
       }
     }
   }
-  System.out.println("valore dephCell = " + value);
   return value;
 }
 
 public int heuristic() {
-  int i,j,value = 0;
+  int i = 0, j = 0, value = 0;
   //row
-  if(M >= K){
+  if(N >= K){
     for (i = 0; i < M; i++) {
       j = 0;
       value += depthCell(i,j,0,1,N);
     }
   }
   //column
-  if(N >= K){
+  if(M >= K){
     for (j = 0; j < N; j++) {
       i = 0;
       value += depthCell(i,j,1,0,M);
@@ -203,10 +205,11 @@ public int heuristic() {
     }
     for(i = 0; i < M; i++){
       if(i<nMaxDiag){
-        j=0;
+        j = 0;
         value += depthCell(i,j,1,1,maxLen);
       }
       else if(maxLen-(i+1-nMaxDiag)>=K){
+        j = 0;
         value += depthCell(i,j,1,1,maxLen-(i+1-nMaxDiag));
       }
       else break;
@@ -219,6 +222,7 @@ public int heuristic() {
         value += depthCell(i,j,1,1,maxLen);
       }
       else if(maxLen-(j+1-nMaxDiag)>=K){
+        i = 0;
         value += depthCell(i,j,1,1,maxLen-(j+1-nMaxDiag));
       }
       else break;
@@ -234,7 +238,7 @@ public int heuristic() {
   
   //antidiagonal
   if(M>=N){
-    for (j = N-2; j >= 0; j--) {
+    for(j = N-2; j >= 0; j--) {
       if(maxLen-(N-j-1)>=K){
         i = 0;
         value += depthCell(i,j,1,-1,maxLen-(N-j-1));
@@ -243,22 +247,24 @@ public int heuristic() {
     }
     for(i = 0; i < M; i++){
       if(i<nMaxDiag){
-        j=N-1;
+        j = N-1;
         value += depthCell(i,j,1,-1,maxLen);
       }
       else if(maxLen-(i+1-nMaxDiag)>=K){
+        j = N-1;
         value += depthCell(i,j,1,-1,maxLen-(i+1-nMaxDiag));
       }
       else break;
     }
   }
   else{
-    for (j = N-1; j >=0; j--) {
-      if(N-j<nMaxDiag){
+    for (j = N-1; j >= 0; j--) {
+      if(N-j-1 < nMaxDiag){
         i = 0;
         value += depthCell(i,j,1,-1,maxLen);
       }
       else if(maxLen-(N-j-nMaxDiag)>=K){
+        i = 0;
         value += depthCell(i,j,1,-1,maxLen-(N-j-nMaxDiag));
       }
       else break;

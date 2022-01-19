@@ -71,7 +71,7 @@ public class MNKGame extends JFrame {
 
 	private MNKPlayerType[]    Player    = new MNKPlayerType[2];
 	private static MNKPlayer[] ComPlayer = new MNKPlayer[2];
-	private final int TIMEOUT = 100000; // 10 seconds timeout				TIMEOUTAAAAAAAAA
+	private final int TIMEOUT = 10; // 10 seconds timeout				TIMEOUTAAAAAAAAA
 
 	// Random number generator
 	private Random Rand = new Random(System.currentTimeMillis());
