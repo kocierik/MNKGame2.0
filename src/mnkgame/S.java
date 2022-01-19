@@ -87,12 +87,12 @@ public class S implements MNKPlayer {
 
 public int seriesBonus(int n, int consecutive, int marked){
   if(n>=K){
-    if(consecutive == K-1) return 10_000;  //10k
-    if(consecutive == K-2) return 1_000;   //1k
-    if(consecutive == K-3) return 100;     //100
+    if(consecutive == K-1) return 100_000;  //100k
+    if(consecutive == K-2) return 10_000;   //10k
+    if(consecutive == K-3) return 1_000;    //1k
     else return (marked/n) * 1_000;
   }
-  return -(marked/n)*100;
+  return 0;
 }
 
 //player 1 = io, player 2 = nemico
@@ -150,7 +150,7 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
       lastPlayer = 2;
       prev = 2;
       if(z >= maxIter-1){
-        value += seriesBonus(c2series, maxSeries, marked);
+        value -= seriesBonus(c2series, maxSeries, marked);
       }
     }
     else if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.FREE){
@@ -469,10 +469,10 @@ public void fillZobristHashes(){
 			else B.unmarkCell();
 		}
     
-    MNKCell a = isLosingCell(FC);
-    if(a != null){
-       return a;
-      }
+    // MNKCell a = isLosingCell(FC);
+    // if(a != null){
+    //    return a;
+    //   }
 
     MNKCell bestCell = null, newCell;
     int searchDepth = 1, maxDepth = B.getFreeCells().length;
