@@ -85,12 +85,12 @@ public class S implements MNKPlayer {
     else return -M*N*1_000;
   }
 
-public int longSeriesBonus(int n, int consecutive, int marked){
+public int seriesBonus(int n, int consecutive, int marked){
   if(n>=K){
     if(consecutive == K-1) return 1_000; //1k
     if(consecutive == K-2) return 100;   //100
     if(consecutive == K-3) return 10;    //10
-    else return (marked/n) * 100;
+    else return (marked/n) * 1000;
   }
   return 0;
 }
@@ -106,7 +106,7 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
   for(int z=0;z<maxIter;z++){
     if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.P1){
       if(lastPlayer==2){
-        value -= longSeriesBonus(c2series, maxSeries,marked);
+        value -= seriesBonus(c2series, maxSeries, marked);
         maxSeries = 0;
         c2series = 0;
         c1series = 1 + lastFreeSeries;
@@ -124,10 +124,13 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
       lastFreeSeries = 0;
       lastPlayer = 1;
       prev = 1;
+      if(z == maxIter){
+        value += seriesBonus(c1series, maxSeries, marked);
+      }
     }
     else if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.P2){
       if(lastPlayer==1){
-        value += longSeriesBonus(c1series, maxSeries, marked);
+        value += seriesBonus(c1series, maxSeries, marked);
         maxSeries = 0;
         c1series = 0;
         c2series = 1 + lastFreeSeries;
@@ -145,6 +148,9 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
       lastFreeSeries = 0;
       lastPlayer = 2;
       prev = 2;
+      if(z == maxIter){
+        value += seriesBonus(c2series, maxSeries, marked);
+      }
     }
     else if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.FREE){
       if(lastPlayer==1){
@@ -157,24 +163,33 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
         lastFreeSeries++;
       }
       else lastFreeSeries = 1;
+
+      if(z == maxIter){
+        if(lastPlayer == 1) value += seriesBonus(c1series, maxSeries, marked);
+        else value += seriesBonus(c2series, maxSeries, marked);
+      }
     }
   }
+  System.out.println("valore dephCell = " + value);
   return value;
 }
 
 public int heuristic() {
   int i,j,value = 0;
   //row
-  for (i = 0; i < M; i++) {
-    j = 0;
-    value += depthCell(i,j,0,1,N);
+  if(M >= K){
+    for (i = 0; i < M; i++) {
+      j = 0;
+      value += depthCell(i,j,0,1,N);
+    }
   }
   //column
-  for (j = 0; j < N; j++) {
-    i = 0;
-    value += depthCell(i,j,1,0,M);
+  if(N >= K){
+    for (j = 0; j < N; j++) {
+      i = 0;
+      value += depthCell(i,j,1,0,M);
+    }
   }
-  
   int maxLen = minMN;
   int nMaxDiag = Math.abs(M-N)+1;
   //diagonal
