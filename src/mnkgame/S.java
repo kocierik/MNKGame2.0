@@ -97,14 +97,26 @@ public class S implements MNKPlayer {
 //   }
 //   return 0;
 // }
-public int seriesBonus(int n, int consecutive, int marked){
+public int seriesBonus(int n, int consecutive, int marked, Boolean open){
   if(n>=K){
-    if(consecutive >= K-1) return 1_000_000 + marked^2;
-    if(consecutive >= K-2) return 50_000 + marked^2;
-    if(consecutive >= K-3) return 500 + marked^2;
+    if(consecutive >= K-1){
+      if(open) {
+        //System.out.println("VITTORIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        return 4_000_000;
+      }
+      return 1_000_000 + marked^2;
+    }
+    if(consecutive >= K-2){
+      if(open) return 200_000;
+      return 100_000 + marked^2;
+    }
+    if(consecutive >= K-3){
+      if(open) return 50_000;
+      return 10_000 + marked^2;
+    }
     else {
-      System.out.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
-      return (marked/n) * 1_000 + marked^2;
+      //System.out.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+      return (marked/n) * 10_000 + marked^2;
     }
   }
   return 0;
@@ -119,24 +131,39 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
   int prev = -1;
   int marked = 0, series = 0, maxSeries = 0;
   int c1series = 0, c2series = 0, lastFreeSeries = 0;
+  Boolean semiopenStart = false;
+  Boolean maxOpen = false;
+  Boolean longest = false;
+
   for(int z=0;z<maxIter;z++){
+    //cell marked from P1
     if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.P1){
       if(lastPlayer==2){
-        value -= seriesBonus(c2series, maxSeries, marked);
+        value -= seriesBonus(c2series, maxSeries, marked, maxOpen);
         c2series = 0;
         c1series = 1 + lastFreeSeries;
-        maxSeries = 1;
+        if(prev==0) semiopenStart = true;
+        else semiopenStart = false;
+        series = 1;
+        maxSeries = series;
+        longest = true;
         marked = 1;
       }
       else{
         if(prev==1){
           series++;
-          if(series>maxSeries) maxSeries = series;
         }
         else{
+          if(prev==0) semiopenStart = true;
+          else semiopenStart = false;
           series = 1;
-          maxSeries = series;
+          c2series+=lastFreeSeries;
         }
+        if(series>maxSeries) {
+          maxSeries = series;
+          longest = true;
+        }
+        else longest = false;
         marked++;
         c1series++;
       }
@@ -144,25 +171,35 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
       lastPlayer = 1;
       prev = 1;
       if(z >= maxIter-1){
-        value += seriesBonus(c1series, maxSeries, marked);
+        value += seriesBonus(c1series, maxSeries, marked, maxOpen);
       }
     }
+    //cell marked from P2
     else if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.P2){
       if(lastPlayer==1){
-        value += seriesBonus(c1series, maxSeries, marked);
+        value += seriesBonus(c1series, maxSeries, marked, maxOpen);
         c1series = 0;
         c2series = 1 + lastFreeSeries;
-        maxSeries = 1;
+        if(prev==0) semiopenStart = true;
+        else semiopenStart = false;
+        series = 1;
+        maxSeries = series;
+        longest = true;
         marked = 1;
       }
       else{
         if(prev==2) {
           series++;
-          if(series>maxSeries) maxSeries = series;
         }
         else {
+          if(prev==0) semiopenStart = true;
+          else semiopenStart = false;
           series = 1;
+          c2series+=lastFreeSeries;
+        }
+        if(series>maxSeries) {
           maxSeries = series;
+          longest = true;
         }
         marked++;
         c2series++;
@@ -171,15 +208,24 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
       lastPlayer = 2;
       prev = 2;
       if(z >= maxIter-1){
-        value -= seriesBonus(c2series, maxSeries, marked);
+        value -= seriesBonus(c2series, maxSeries, marked, maxOpen);
       }
     }
+    //free cell
     else if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.FREE){
       if(lastPlayer==1){
         c1series++;
+        if(longest){
+          maxOpen = semiopenStart;
+          longest = false;
+        } 
       }
       if(lastPlayer==2){
         c2series++;
+        if(longest){
+          maxOpen = semiopenStart;
+          longest = false;
+        }
       }
       if(prev!=1 && prev!=2){
         lastFreeSeries++;
@@ -188,8 +234,8 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
 
       prev = 0;
       if(z >= maxIter-1){
-        if(lastPlayer == 1) value += seriesBonus(c1series, maxSeries, marked);
-        else if(lastPlayer == 2) value -= seriesBonus(c2series, maxSeries, marked);
+        if(lastPlayer == 1) value += seriesBonus(c1series, maxSeries, marked, maxOpen);
+        else if(lastPlayer == 2) value -= seriesBonus(c2series, maxSeries, marked, maxOpen);
         else value = 0;
       }
     }
@@ -301,6 +347,8 @@ public int heuristic() {
       }
     }
     System.out.println("COMPRESO: "+(value>=MIN&&value<=MAX));
+    if(value>MAX) return MAX;
+    if(value<MIN) return MIN;
     return value;
 }
 
@@ -400,6 +448,7 @@ public int heuristic() {
         return TIMEOUT_VALUE;
 
       if(value >= beta) {
+        System.out.println("beta"+beta);
         storeTransposition(searchDepth, c, beta, TRANSPOSITION_KIND_UPPER);
         return beta;
       }
