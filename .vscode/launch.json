@@ -11,8 +11,8 @@
       "mainClass": "mnkgame.MNKGame",
       "projectName": "MNKGame2.0_8af27798",
       "args": [
-        "6",
         "5",
+        "6",
         "4",
         "mnkgame.S"
       ]
