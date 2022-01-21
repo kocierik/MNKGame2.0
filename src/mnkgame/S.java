@@ -104,19 +104,20 @@ public int seriesBonus(int n, int consecutive, int marked, Boolean open){
         //System.out.println("VITTORIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         return 4_000_000;
       }
-      return 1_000_000 + marked^2;
+      return 2_000_000 + marked^2;
     }
     if(consecutive >= K-2){
-      if(open) return 200_000;
-      return 100_000 + marked^2;
+      if(open) return 500_000;
+      return 300_000 + marked^2;
     }
     if(consecutive >= K-3){
-      if(open) return 50_000;
-      return 10_000 + marked^2;
+      if(open) return 100_000 + marked^2;
+      return 50_000 + marked^2;
     }
     else {
       //System.out.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
-      return (marked/n) * 10_000 + marked^2;
+      return (int)(((double)marked/(double)n) * 10_000 + ((double)marked/(double)(n-marked))*100_000);
+      //20_000/3 + 20_000 + 4
     }
   }
   return 0;
@@ -157,7 +158,8 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
           if(prev==0) semiopenStart = true;
           else semiopenStart = false;
           series = 1;
-          c2series+=lastFreeSeries;
+          if(lastPlayer==0) //only free cells are before this one
+            c1series+= lastFreeSeries;
         }
         if(series>maxSeries) {
           maxSeries = series;
@@ -195,12 +197,14 @@ public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
           if(prev==0) semiopenStart = true;
           else semiopenStart = false;
           series = 1;
-          c2series+=lastFreeSeries;
+          if(lastPlayer==0) //only free cells are before this one
+            c2series+= lastFreeSeries;
         }
         if(series>maxSeries) {
           maxSeries = series;
           longest = true;
         }
+        else longest = false;
         marked++;
         c2series++;
       }
@@ -448,7 +452,7 @@ public int heuristic() {
         return TIMEOUT_VALUE;
 
       if(value >= beta) {
-        System.out.println("beta"+beta);
+        //System.out.println("beta"+beta);
         storeTransposition(searchDepth, c, beta, TRANSPOSITION_KIND_UPPER);
         return beta;
       }
