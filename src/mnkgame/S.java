@@ -13,7 +13,7 @@ public class S implements MNKPlayer {
   private static MNKCellState myCell;
 	private MNKBoard B;
   private int M,N,K, minMN;
-  private static int MAX = 10_000_000, MIN = -MAX;
+  private static int MAX = 100_000_000, MIN = -MAX;
   private static MNKCell lastMarked;
 	private int TIMEOUT;
 	private int TIMEOUT_VALUE = MAX+1;
@@ -350,8 +350,8 @@ public int heuristic() {
         }
       }
     }
-    System.out.println("COMPRESO: "+(value>=MIN&&value<=MAX));
-    if(value>MAX) return MAX;
+    if(!(value>=MIN&&value<=MAX))System.out.println("FALSO");
+    if(value>MAX) return MAX; // CORRETTO???????????????????
     if(value<MIN) return MIN;
     return value;
 }
@@ -502,11 +502,12 @@ public void fillZobristHashes(){
   }
 
   MNKCell isLosingCell(MNKCell[] FC){
-		int pos   = rand.nextInt(FC.length); 
-		MNKCell c = FC[pos]; // random move
+
+    if(FC.length > 1){
+		MNKCell c = FC[0]; // random move
 		B.markCell(c.i,c.j); // mark the random position	
 		for(int k = 0; k < FC.length; k++) {
-      if(k != pos) {     
+      if(k != 0) {     
 				MNKCell d = FC[k];
 				if(B.markCell(d.i,d.j) == yourWin) {
 					B.unmarkCell();        
@@ -516,11 +517,39 @@ public void fillZobristHashes(){
 				} else {
 					B.unmarkCell();	       
 				}	
-			}	
+			}
 		}
 		// No win or loss, return the randomly selected move
     B.unmarkCell();
+
+    MNKCell c1 = FC[1]; // random move
+		B.markCell(c1.i,c1.j); // mark the random position	
+		for(int k = 0; k < FC.length; k++) {
+      if(k != 1) {     
+				MNKCell d = FC[k];
+				if(B.markCell(d.i,d.j) == yourWin) {
+					B.unmarkCell();        
+					B.unmarkCell();	       
+					B.markCell(d.i,d.j);   
+					return d;							 
+				} else {
+					B.unmarkCell();	       
+				}	
+			}
+		}
+    B.unmarkCell();
+  }
+
 		return null;
+  }
+
+  public MNKCell centerCell(MNKCell MC[]){
+    if(MC.length == 0 ){
+      B.markCell(M/2, N/2);
+      
+      return new MNKCell(M/2, N/2);
+    }
+    return null;
   }
 
   // Fulcro dell'applicativo che esegue le funzioni citate sopra
@@ -537,20 +566,14 @@ public void fillZobristHashes(){
     }
 
     // Inizia sempre al centro
-    if(MC.length == 0 ){
-      B.markCell(M/2, N/2);
-      return new MNKCell(M/2, N/2);
-    }
+
 
     for(MNKCell d : FC) {
 			if(B.markCell(d.i,d.j) == myWin) return d; 
 			else B.unmarkCell();
 		}
     
-    MNKCell a = isLosingCell(FC);
-    if(a != null){
-       return a;
-      }
+
 
     MNKCell bestCell = null, newCell;
     int searchDepth = 1, maxDepth = B.getFreeCells().length;
@@ -561,13 +584,15 @@ public void fillZobristHashes(){
     }
     lastMarked = bestCell;
 
-    // TODO: remove
-    if(bestCell == null) {
-      throw new Error("bestCell is null");
-    }
-    System.out.println("marked " + bestCell);
-    System.out.println("transposition table usage: \t" +tre+"\t" + ((float)tre/TRANSPOSITION_TABLE_LENGTH)*100 + "%\ntransposition table overwrite: \t" + tro +"\t" + ((float)tro/(tre+1))*100 + "%\ntransposition table hits: \t"+trh+"\t" + ((float)trh/(trh+trm+1))*100 + "%\ntransposition table overwrite:\t"+tro+"\t" + ((float)trm/(trh+trm+1))*100 + "%");
-    System.out.println("[---------------------------------------------------------]");
+    // System.out.println("marked " + bestCell);
+    // System.out.println("transposition table usage: \t" +tre+"\t" + ((float)tre/TRANSPOSITION_TABLE_LENGTH)*100 + "%\ntransposition table overwrite: \t" + tro +"\t" + ((float)tro/(tre+1))*100 + "%\ntransposition table hits: \t"+trh+"\t" + ((float)trh/(trh+trm+1))*100 + "%\ntransposition table overwrite:\t"+tro+"\t" + ((float)trm/(trh+trm+1))*100 + "%");
+    // System.out.println("[---------------------------------------------------------]");
+    
+    MNKCell b = centerCell(MC);
+    if(b != null) return b;
+    MNKCell a = isLosingCell(FC);
+    if(a != null) return a;
+
     markCell(bestCell.i, bestCell.j);
     return bestCell;
   }
