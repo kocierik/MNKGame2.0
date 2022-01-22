@@ -97,30 +97,46 @@ public class S implements MNKPlayer {
 //   }
 //   return 0;
 // }
+//gives values to the series
 public int seriesBonus(int n, int consecutive, int marked, Boolean open){
+  int res = 0;
   if(n>=K){
-    if(consecutive >= K-1){
-      if(open) {
-        //System.out.println("VITTORIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-        return 4_000_000;
+    if(consecutive>=K-3){
+      if(consecutive >= K-1){
+          if(open) {
+              res += 30_000_000;
+          }
+          else{
+              res += 6_000_000;
+          }
       }
-      return 2_000_000 + marked^2;
-    }
-    if(consecutive >= K-2){
-      if(open) return 500_000;
-      return 300_000 + marked^2;
-    }
-    if(consecutive >= K-3){
-      if(open) return 100_000 + marked^2;
-      return 50_000 + marked^2;
+      else if(consecutive >= K-2){
+          if(open) {
+              res += 2_900_000;
+          }
+          else{
+              res += 1_400_000;
+          }
+      }
+      else if(consecutive >= K-3){
+          if(open){
+              res += 600_000;
+          }
+          else{
+              res += 200_000;
+          }
+      }
+      //evaluate non consecutive cells density
+      res += ((double)(marked-consecutive)/(double)(n-consecutive))*100_000;
     }
     else {
-      //System.out.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
-      return (int)(((double)marked/(double)n) * 10_000 + ((double)marked/(double)(n-marked))*100_000);
-      //20_000/3 + 20_000 + 4
+      if(marked>=K-3){
+        res+=(marked)*50_000;
+      }
+      res += ((double)marked/(double)n)*100_000;
     }
   }
-  return 0;
+  return res;
 }
 
 //player 1 = io, player 2 = nemico
