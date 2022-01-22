@@ -8,6 +8,12 @@
   
 - `make clean`  remove builded file
 
+- `make a`  computer vs computer output only
+
+- `make v`  computer vs computer no GUI verbose output
+
+- `make pp`  computer vs computer GUI verbose output
+
 ---
 
 

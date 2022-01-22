@@ -504,13 +504,11 @@ public void fillZobristHashes(){
     return bestCell;
   }
 
-  MNKCell isLosingCell(MNKCell[] FC){
-
-    if(FC.length > 1){
-		MNKCell c = FC[0]; // random move
+  MNKCell isLosingCell(MNKCell[] FC, int randCell){
+    MNKCell c = FC[randCell]; // random move
 		markCell(c.i,c.j); // mark the random position	
 		for(int k = 0; k < FC.length; k++) {
-      if(k != 0) {     
+      if(k != randCell) {     
 				MNKCell d = FC[k];
 				if(markCell(d.i,d.j) == yourWin) {
 					unmarkCell();        
@@ -524,25 +522,7 @@ public void fillZobristHashes(){
 		}
 		// No win or loss, return the randomly selected move
     unmarkCell();
-
-    MNKCell c1 = FC[1]; // random move
-		markCell(c1.i,c1.j); // mark the random position	
-		for(int k = 0; k < FC.length; k++) {
-      if(k != 1) {     
-				MNKCell d = FC[k];
-				if(markCell(d.i,d.j) == yourWin) {
-					unmarkCell();        
-					unmarkCell();	       
-					markCell(d.i,d.j);   
-					return d;							 
-				} else {
-					unmarkCell();	       
-				}	
-			}
-		}
-    unmarkCell();
-  }
-
+    
 		return null;
   }
 
@@ -591,8 +571,12 @@ public void fillZobristHashes(){
     
     MNKCell b = centerCell(MC);
     if(b != null) return b;
-    MNKCell a = isLosingCell(FC);
-    if(a != null) return a;
+    if(FC.length>1){
+      MNKCell a = isLosingCell(FC,1);
+      if(a != null) return a;
+      MNKCell c = isLosingCell(FC,0);
+      if(c != null) return c;
+    }
 
     markCell(bestCell.i, bestCell.j);
     return bestCell;
