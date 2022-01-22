@@ -1,33 +1,22 @@
 package mnkgame;
-
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Random;
-
-import javax.security.auth.x500.X500Principal;
-
 import java.security.*;
 public class S implements MNKPlayer {
 	private static MNKGameState myWin;
 	private static MNKGameState yourWin;
-  private static MNKCellState myCell;
 	private MNKBoard B;
   private int M,N,K, minMN;
   private static int MAX = 100_000_000, MIN = -MAX;
-  private static MNKCell lastMarked;
 	private int TIMEOUT;
 	private int TIMEOUT_VALUE = MAX+1;
 	private long start;
-	private Random rand;
 	private SecureRandom random;
 	private long[][][] zobristTable;
   // 6 * 4 (int) * TRANSPOSITION_TABLE_LENGTH = 
   private static int TRANSPOSITION_TABLE_LENGTH = 1024 * 1024 * 4;
-  private static int TRANSPOSITION_ENTRY_LENGTH = 6;
   private static int TRANSPOSITION_ENTRY_NOT_FOUND = Integer.MAX_VALUE;
   private static int TRANSPOSITION_KIND_EXACT = 0,
     TRANSPOSITION_KIND_LOWER = -1, TRANSPOSITION_KIND_UPPER = 1;
-  private static int[] times_score = new int[8];
         
   // transposition entry structure: [
   // first 32 bits of the hash key, 
@@ -50,15 +39,13 @@ public class S implements MNKPlayer {
 	// Classe di inizializzazione del gioco
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
 		// New random seed for each game
-		rand    = new Random(System.currentTimeMillis()); 
-		B       = new MNKBoard(M,N,K);
+		B      = new MNKBoard(M,N,K);
     this.M = M;
     this.N = N;
     this.K = K;
     this.minMN = Math.min(M,N);
 		myWin   = first ? MNKGameState.WINP1 : MNKGameState.WINP2; 
 		yourWin = first ? MNKGameState.WINP2 : MNKGameState.WINP1;
-		myCell   = first ? MNKCellState.P1 : MNKCellState.P2;
 		TIMEOUT = timeout_in_secs;	
     currentHash = 0;
     random = new SecureRandom();
@@ -597,7 +584,6 @@ public void fillZobristHashes(){
       if((newCell = negamaxRoot(searchDepth++)) != null)
         bestCell = newCell;
     }
-    lastMarked = bestCell;
 
     // System.out.println("marked " + bestCell);
     // System.out.println("transposition table usage: \t" +tre+"\t" + ((float)tre/TRANSPOSITION_TABLE_LENGTH)*100 + "%\ntransposition table overwrite: \t" + tro +"\t" + ((float)tro/(tre+1))*100 + "%\ntransposition table hits: \t"+trh+"\t" + ((float)trh/(trh+trm+1))*100 + "%\ntransposition table overwrite:\t"+tro+"\t" + ((float)trm/(trh+trm+1))*100 + "%");
