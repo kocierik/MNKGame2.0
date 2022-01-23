@@ -334,7 +334,7 @@ public int heuristic() {
     if(value<MIN) return MIN+1;
     //
     return value;
-}
+  }
 
   private long currentHash;
   //compute zobrist hashing marking the cell
@@ -370,7 +370,7 @@ public int heuristic() {
     int[] entry = transposition[currentHashIndex()];
     int firstHash = (int) (currentHash >> 32), secondHash = (int) currentHash;
     if(transposition[currentHashIndex()] != null){
-      // avoid collisions (verify the hashes match)
+      //avoid collisions (verify the hashes match)
       if(entry != null && firstHash == entry[0] && secondHash == entry[1]) {
         if (entry[2] >= searchDepth) {
           if (entry[5] == TRANSPOSITION_KIND_EXACT)

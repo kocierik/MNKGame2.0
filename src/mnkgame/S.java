@@ -1,12 +1,12 @@
 package mnkgame;
-import java.util.Random;
 import java.security.*;
+
 public class S implements MNKPlayer {
 	private static MNKGameState myWin;
 	private static MNKGameState yourWin;
 	private MNKBoard B;
   private int M,N,K, minMN;
-  private static int MAX = 100_000_000, MIN = -MAX;
+  private static int MAX = 1_000_000_000, MIN = -MAX;
 	private int TIMEOUT;
 	private int TIMEOUT_VALUE = MAX+1;
 	private long start;
@@ -28,15 +28,10 @@ public class S implements MNKPlayer {
   // ]
   private int[][] transposition;
 
-  // TODO: remove, debug only
-  private int tre = 0, tro = 0, trh = 0, trm = 0;
-
-	/**
-	 * Default empty constructor
-	 */
+  //Default empty constructor
 	public S() {}
 
-	// Classe di inizializzazione del gioco
+	//initializing game class
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
 		// New random seed for each game
 		B      = new MNKBoard(M,N,K);
@@ -52,18 +47,11 @@ public class S implements MNKPlayer {
 		zobristTable = new long [M][N][2];
     fillZobristHashes();
     transposition = new int[TRANSPOSITION_TABLE_LENGTH][];
-    tre = tro = trh = trm = 0;
 	}
-//--------------------------------------------------------------------------------
-
-	/* Valutazione dello stato di gioco:
-		1 = gioco aperto
-		0 = pareggio
-		10 = vittoria
-		-10 = sconfitta
-	*/
+  //--------------------------------------------------------------------------------
+  //evaluate board game state
   int value;
-	public int evaluate() {
+	  public int evaluate() {
 		MNKGameState state = B.gameState();
 		if(state == MNKGameState.OPEN){
       value =  heuristic();
@@ -71,186 +59,175 @@ public class S implements MNKPlayer {
       return value;
     }
 		else if(state == MNKGameState.DRAW) return 0;
-		else if(state == myWin) return M*N*1_000;
-    else return -M*N*1_000;
+		else if(state == myWin) return MAX-1;
+    else return MIN+1;
   }
 
-// public int seriesBonus(int n, int consecutive, int marked){
-//   if(n>=K){
-//     if(consecutive == K-1) return 100_000;  //100k
-//     if(consecutive == K-2) return 10_000;   //10k
-//     if(consecutive == K-3) return 1_000;    //1k
-//     else return (marked/n) * 1_000;
-//   }
-//   return 0;
-// }
-//gives values to the series
-public int seriesBonus(int n, int consecutive, int marked, Boolean open){
-  int res = 0;
-  if(n>=K){
-    if(consecutive>=K-3){
-      if(consecutive >= K-1){
-          if(open) {
+  //gives values to the series
+  public int seriesBonus(int n, int consecutive, int marked, Boolean open){
+    int res = 0;
+    if(n>=K){
+      if(consecutive>=K-3){
+        if(consecutive >= K-1){
+            if(open) {
               res += 30_000_000;
-          }
-          else{
+            }
+            else{
               res += 6_000_000;
-          }
-      }
-      else if(consecutive >= K-2){
-          if(open) {
+            }
+        }
+        else if(consecutive >= K-2){
+            if(open) {
               res += 2_900_000;
-          }
-          else{
+            }
+            else{
               res += 1_400_000;
-          }
-      }
-      else if(consecutive >= K-3){
-          if(open){
+            }
+        }
+        else if(consecutive >= K-3){
+            if(open){
               res += 600_000;
-          }
-          else{
+            }
+            else{
               res += 200_000;
-          }
+            }
+        }
+        //evaluate non consecutive cells density
+        res += ((double)(marked-consecutive)/(double)(n-consecutive))*100_000;
       }
-      //evaluate non consecutive cells density
-      res += ((double)(marked-consecutive)/(double)(n-consecutive))*100_000;
-    }
-    else {
-      if(marked>=K-3){
-        res+=(marked)*50_000;
+      else {
+        if(marked>=K-3){
+          res+=(marked)*50_000;
+        }
+        res += ((double)marked/(double)n)*100_000;
       }
-      res += ((double)marked/(double)n)*100_000;
     }
+    return res;
   }
-  return res;
-}
 
-//player 1 = io, player 2 = nemico
-public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
-  int value = 0;
-  //last_player è 1 o 2
-  int lastPlayer = 0;
-  // prev è 0, 1 o 2
-  int prev = -1;
-  int marked = 0, series = 0, maxSeries = 0;
-  int c1series = 0, c2series = 0, lastFreeSeries = 0;
-  Boolean semiopenStart = false;
-  Boolean maxOpen = false;
-  Boolean longest = false;
+  //evaluate one row, column, diagonal or antidiagonal
+  public int depthCell(int i, int j, int dir_i, int dir_j, int maxIter){
+    int value = 0;
+    //last player is 1 or 2
+    int lastPlayer = 0;
+    // prev is 0, 1 or 2
+    int prev = -1;
+    int marked = 0, series = 0, maxSeries = 0;
+    int c1series = 0, c2series = 0, lastFreeSeries = 0;
+    Boolean semiopenStart = false, maxOpen = false, longest = false;
 
-  for(int z=0;z<maxIter;z++){
-    //cell marked from P1
-    if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.P1){
-      if(lastPlayer==2){
-        value -= seriesBonus(c2series, maxSeries, marked, maxOpen);
-        c2series = 0;
-        c1series = 1 + lastFreeSeries;
-        if(prev==0) semiopenStart = true;
-        else semiopenStart = false;
-        series = 1;
-        maxSeries = series;
-        longest = true;
-        marked = 1;
-      }
-      else{
-        if(prev==1){
-          series++;
+    for(int z=0;z<maxIter;z++){
+      //cell marked from P1
+      if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.P1){
+        if(lastPlayer==2){
+          value -= seriesBonus(c2series, maxSeries, marked, maxOpen);
+          c2series = 0;
+          c1series = 1 + lastFreeSeries;
+          if(prev==0) semiopenStart = true;
+          else semiopenStart = false;
+          series = 1;
+          maxSeries = series;
+          longest = true;
+          marked = 1;
         }
         else{
+          if(prev==1){
+            series++;
+          }
+          else{
+            if(prev==0) semiopenStart = true;
+            else semiopenStart = false;
+            series = 1;
+            if(lastPlayer==0) //only free cells are before this one
+              c1series+= lastFreeSeries;
+          }
+          if(series>maxSeries) {
+            maxSeries = series;
+            longest = true;
+          }
+          else longest = false;
+          marked++;
+          c1series++;
+        }
+        lastFreeSeries = 0;
+        lastPlayer = 1;
+        prev = 1;
+        if(z >= maxIter-1){
+          value += seriesBonus(c1series, maxSeries, marked, maxOpen);
+        }
+      }
+      //cell marked from P2
+      else if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.P2){
+        if(lastPlayer==1){
+          value += seriesBonus(c1series, maxSeries, marked, maxOpen);
+          c1series = 0;
+          c2series = 1 + lastFreeSeries;
           if(prev==0) semiopenStart = true;
           else semiopenStart = false;
           series = 1;
-          if(lastPlayer==0) //only free cells are before this one
-            c1series+= lastFreeSeries;
-        }
-        if(series>maxSeries) {
           maxSeries = series;
           longest = true;
+          marked = 1;
         }
-        else longest = false;
-        marked++;
-        c1series++;
-      }
-      lastFreeSeries = 0;
-      lastPlayer = 1;
-      prev = 1;
-      if(z >= maxIter-1){
-        value += seriesBonus(c1series, maxSeries, marked, maxOpen);
-      }
-    }
-    //cell marked from P2
-    else if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.P2){
-      if(lastPlayer==1){
-        value += seriesBonus(c1series, maxSeries, marked, maxOpen);
-        c1series = 0;
-        c2series = 1 + lastFreeSeries;
-        if(prev==0) semiopenStart = true;
-        else semiopenStart = false;
-        series = 1;
-        maxSeries = series;
-        longest = true;
-        marked = 1;
-      }
-      else{
-        if(prev==2) {
-          series++;
+        else{
+          if(prev==2) {
+            series++;
+          }
+          else {
+            if(prev==0) semiopenStart = true;
+            else semiopenStart = false;
+            series = 1;
+            if(lastPlayer==0) //only free cells are before this one
+              c2series+= lastFreeSeries;
+          }
+          if(series>maxSeries) {
+            maxSeries = series;
+            longest = true;
+          }
+          else longest = false;
+          marked++;
+          c2series++;
         }
-        else {
-          if(prev==0) semiopenStart = true;
-          else semiopenStart = false;
-          series = 1;
-          if(lastPlayer==0) //only free cells are before this one
-            c2series+= lastFreeSeries;
-        }
-        if(series>maxSeries) {
-          maxSeries = series;
-          longest = true;
-        }
-        else longest = false;
-        marked++;
-        c2series++;
-      }
-      lastFreeSeries = 0;
-      lastPlayer = 2;
-      prev = 2;
-      if(z >= maxIter-1){
-        value -= seriesBonus(c2series, maxSeries, marked, maxOpen);
-      }
-    }
-    //free cell
-    else if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.FREE){
-      if(lastPlayer==1){
-        c1series++;
-        if(longest){
-          maxOpen = semiopenStart;
-          longest = false;
-        } 
-      }
-      if(lastPlayer==2){
-        c2series++;
-        if(longest){
-          maxOpen = semiopenStart;
-          longest = false;
+        lastFreeSeries = 0;
+        lastPlayer = 2;
+        prev = 2;
+        if(z >= maxIter-1){
+          value -= seriesBonus(c2series, maxSeries, marked, maxOpen);
         }
       }
-      if(prev!=1 && prev!=2){
-        lastFreeSeries++;
-      }
-      else lastFreeSeries = 1;
+      //free cell
+      else if(B.cellState(i+z*dir_i,j+z*dir_j) == MNKCellState.FREE){
+        if(lastPlayer==1){
+          c1series++;
+          if(longest){
+            maxOpen = semiopenStart;
+            longest = false;
+          } 
+        }
+        if(lastPlayer==2){
+          c2series++;
+          if(longest){
+            maxOpen = semiopenStart;
+            longest = false;
+          }
+        }
+        if(prev!=1 && prev!=2){
+          lastFreeSeries++;
+        }
+        else lastFreeSeries = 1;
 
-      prev = 0;
-      if(z >= maxIter-1){
-        if(lastPlayer == 1) value += seriesBonus(c1series, maxSeries, marked, maxOpen);
-        else if(lastPlayer == 2) value -= seriesBonus(c2series, maxSeries, marked, maxOpen);
-        else value = 0;
+        prev = 0;
+        if(z >= maxIter-1){
+          if(lastPlayer == 1) value += seriesBonus(c1series, maxSeries, marked, maxOpen);
+          else if(lastPlayer == 2) value -= seriesBonus(c2series, maxSeries, marked, maxOpen);
+          else value = 0;
+        }
       }
     }
+    return value;
   }
-  return value;
-}
-
-public int heuristic() {
+  //returns one board's value
+  public int heuristic() {
     int i = 0, j = 0, value = 0;
     //row
     if(N >= K){
@@ -310,7 +287,6 @@ public int heuristic() {
           else break;
         }
       }
-      
       //antidiagonal
       if(M>=N){
         for(j = N-2; j >= 0; j--) {
@@ -353,27 +329,32 @@ public int heuristic() {
         }
       }
     }
+    //TODO: remove
     if(!(value>=MIN&&value<=MAX))System.out.println("FALSO");
-    if(value>MAX) return MAX; // CORRETTO???????????????????
-    if(value<MIN) return MIN;
+    //this shouldn't happen, but we check it just in case
+    if(value>MAX) return MAX-1; 
+    if(value<MIN) return MIN+1;
     return value;
-}
-
+  }
+  
   private long currentHash;
+  //compute zobrist hashing marking the cell
   private MNKGameState markCell(int i, int j) {
     currentHash ^= zobristTable[i][j][B.currentPlayer()];
     return B.markCell(i, j);
   }
+  //compute zobrist hashing unmarking the cell
   private void unmarkCell() {
     MNKCell c = B.getMarkedCells()[B.getMarkedCells().length-1];
     currentHash ^= zobristTable[c.i][c.j][B.currentPlayer() == 1 ? 0 : 1];
     B.unmarkCell();
   }
-
+  //time limit
   private boolean isTimeRunningOut() {
     return (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(94.0/100.0);
   }
-
+  
+  //returns hashing value index
   private int currentHashIndex() {
     return Math.abs((int) (currentHash % TRANSPOSITION_TABLE_LENGTH));
   }
@@ -381,37 +362,33 @@ public int heuristic() {
   // these function take for granted that the search is relative to currentHash
   private void storeTransposition(int searchDepth, int bestMove, int value, int valueKind) {
     int firstHash = (int) (currentHash >> 32), secondHash = (int) currentHash;
-    if(transposition[currentHashIndex()] != null)
-      tro++;
-    else
-      tre++;
-    
     transposition[currentHashIndex()] = new int[]{
       firstHash, secondHash, searchDepth, bestMove, value, valueKind
     };
   }
+
   private int bestMove = -1;
+  //returns a value if there is a cache hit retrieved from transposition table
   private int retrieveTransposition(int searchDepth, int alpha, int beta) {
     int[] entry = transposition[currentHashIndex()];
     int firstHash = (int) (currentHash >> 32), secondHash = (int) currentHash;
     if(transposition[currentHashIndex()] != null)
-    // avoid collisions (verify the hashes match)
-    if(entry != null && firstHash == entry[0] && secondHash == entry[1]) {
-      if (entry[2] >= searchDepth) {
-        if (entry[5] == TRANSPOSITION_KIND_EXACT)
-          return entry[4];
-        if (entry[5] == TRANSPOSITION_KIND_LOWER && entry[4] <= alpha)
-          return alpha;
-        if (entry[5] == TRANSPOSITION_KIND_UPPER && entry[4] >= beta)
-          return beta;
+      //avoid collisions (verify the hashes match)
+      if(entry != null && firstHash == entry[0] && secondHash == entry[1]) {
+        if (entry[2] >= searchDepth) {
+          if (entry[5] == TRANSPOSITION_KIND_EXACT)
+            return entry[4];
+          if (entry[5] == TRANSPOSITION_KIND_LOWER && entry[4] <= alpha)
+            return alpha;
+          if (entry[5] == TRANSPOSITION_KIND_UPPER && entry[4] >= beta)
+            return beta;
+        }
+        bestMove = entry[3];
       }
-      bestMove = entry[3];
-      trh++;
-    } else
-      trm++;
     return TRANSPOSITION_ENTRY_NOT_FOUND;
   }
 
+  //saves board free cells and check if there is the best move
   private int[] getFreeCells() {
     int[] res = new int[B.getFreeCells().length];
     int i = 0;
@@ -421,19 +398,17 @@ public int heuristic() {
       if(res[i-1] == bestMove)
         doWeHaveTheBestMove = true;
     }
-
     // take into account any possible bestMove
     if(bestMove != -1 && doWeHaveTheBestMove) {
       int tmp = res[0];
       res[0] = bestMove;
       res[res.length-1] = tmp;
     }
-
     return res;
   }
 
 //--------------------------------------------------------------------------------
-
+  //negamax implementation
   public int negamax(int searchDepth, int alpha, int beta, int color) {
     int value, localBestMove = -1, valueKind = TRANSPOSITION_KIND_LOWER;
     if((value = retrieveTransposition(searchDepth, alpha, beta)) != TRANSPOSITION_ENTRY_NOT_FOUND)
@@ -455,7 +430,6 @@ public int heuristic() {
         return TIMEOUT_VALUE;
 
       if(value >= beta) {
-        //System.out.println("beta"+beta);
         storeTransposition(searchDepth, c, beta, TRANSPOSITION_KIND_UPPER);
         return beta;
       }
@@ -470,24 +444,21 @@ public int heuristic() {
   }
 
 //--------------------------------------------------------------------------------
-// Inizializzazione tabella di zobristTable
-// public long random64(){
-//   random = new SecureRandom();
-//   return random.nextLong();
-// }
 
-public void fillZobristHashes(){
-  new Thread(() ->{
-    for (int i = 0; i < M; i++) {
-      for (int j = 0; j < N; j++) {
-        zobristTable[i][j][0] = random.nextLong();
-        zobristTable[i][j][1] = random.nextLong();
+  // Initialiaze zobristTable with random numbers
+  public void fillZobristHashes(){
+    new Thread(() ->{
+      for (int i = 0; i < M; i++) {
+        for (int j = 0; j < N; j++) {
+          zobristTable[i][j][0] = random.nextLong();
+          zobristTable[i][j][1] = random.nextLong();
+        }
       }
-    }
-  }).start();
-}
+    }).start();
+  }
 
-  // NOTE: returns null if the time runs out before we can decide a meaningful move
+  //keeping track of both the best score and its relative cell.
+  //NOTE: returns null if the time runs out before we can decide a meaningful move
   private MNKCell negamaxRoot(int searchDepth) {
     MNKCell bestCell = null;
     int alpha = MIN, beta = MAX, score;
@@ -500,10 +471,12 @@ public void fillZobristHashes(){
         bestCell = new MNKCell(c/minMN, c%minMN);
       }
     }
+    //TODO: remove
     System.out.println(":: depth=" + searchDepth + " best " + alpha + " in [" + alpha + "," + beta + "] -> " + bestCell);
     return bestCell;
   }
-
+  
+  //marked opponent cell if it can win
   MNKCell isLosingCell(MNKCell[] FC, int randCell){
     MNKCell c = FC[randCell]; // random move
 		markCell(c.i,c.j); // mark the random position	
@@ -520,12 +493,13 @@ public void fillZobristHashes(){
 				}	
 			}
 		}
-		// No win or loss, return the randomly selected move
+		//No win or loss, return the randomly selected move
     unmarkCell();
     
 		return null;
   }
 
+  //start in the middle of the board
   public MNKCell centerCell(MNKCell MC[]){
     if(MC.length == 0 ){
       markCell(M/2, N/2);
@@ -534,41 +508,31 @@ public void fillZobristHashes(){
     return null;
   }
 
-  // Fulcro dell'applicativo che esegue le funzioni citate sopra
+  //engine game
   public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
-    trm = trh = 0;
-    start = System.currentTimeMillis();	
+    start = System.currentTimeMillis();
+    //TODO: remove
     System.out.println("computation started");
-
-    // funzione che va a marcare l'ultima cella inserita dall'avversario
-    // scritta dal prof necessaria per il funzionamento
     if(MC.length > 0) {
       MNKCell d = MC[MC.length-1]; 
       markCell(d.i,d.j);         
     }
-
-    // Inizia sempre al centro
-
-
+    
+    //mark the winning cell
     for(MNKCell d : FC) {
 			if(markCell(d.i,d.j) == myWin) return d; 
 			else unmarkCell();
 		}
-    
-
 
     MNKCell bestCell = null, newCell;
     int searchDepth = 1, maxDepth = B.getFreeCells().length;
+    //TODO: remove
     System.out.println("[---------------------------------------------------------]");
+    //iterative deepining
     while(!isTimeRunningOut() && searchDepth <= maxDepth) {
       if((newCell = negamaxRoot(searchDepth++)) != null)
         bestCell = newCell;
     }
-
-    // System.out.println("marked " + bestCell);
-    // System.out.println("transposition table usage: \t" +tre+"\t" + ((float)tre/TRANSPOSITION_TABLE_LENGTH)*100 + "%\ntransposition table overwrite: \t" + tro +"\t" + ((float)tro/(tre+1))*100 + "%\ntransposition table hits: \t"+trh+"\t" + ((float)trh/(trh+trm+1))*100 + "%\ntransposition table overwrite:\t"+tro+"\t" + ((float)trm/(trh+trm+1))*100 + "%");
-    // System.out.println("[---------------------------------------------------------]");
-    
     MNKCell b = centerCell(MC);
     if(b != null) return b;
     if(FC.length>1){
@@ -584,7 +548,4 @@ public void fillZobristHashes(){
   public String playerName() {
     return "Android";
   }
-
-
-
 }
