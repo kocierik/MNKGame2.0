@@ -329,8 +329,6 @@ public class S implements MNKPlayer {
         }
       }
     }
-    //TODO: remove
-    if(!(value>=MIN&&value<=MAX))System.out.println("FALSO");
     //this shouldn't happen, but we check it just in case
     if(value>MAX) return MAX-1; 
     if(value<MIN) return MIN+1;
@@ -471,8 +469,6 @@ public class S implements MNKPlayer {
         bestCell = new MNKCell(c/minMN, c%minMN);
       }
     }
-    //TODO: remove
-    System.out.println(":: depth=" + searchDepth + " best " + alpha + " in [" + alpha + "," + beta + "] -> " + bestCell);
     return bestCell;
   }
   
@@ -511,8 +507,6 @@ public class S implements MNKPlayer {
   //engine game
   public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
     start = System.currentTimeMillis();
-    //TODO: remove
-    System.out.println("computation started");
     if(MC.length > 0) {
       MNKCell d = MC[MC.length-1]; 
       markCell(d.i,d.j);         
@@ -526,8 +520,6 @@ public class S implements MNKPlayer {
 
     MNKCell bestCell = null, newCell;
     int searchDepth = 1, maxDepth = B.getFreeCells().length;
-    //TODO: remove
-    System.out.println("[---------------------------------------------------------]");
     //iterative deepining
     while(!isTimeRunningOut() && searchDepth <= maxDepth) {
       if((newCell = negamaxRoot(searchDepth++)) != null)
