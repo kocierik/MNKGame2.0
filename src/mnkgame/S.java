@@ -452,14 +452,12 @@ public class S implements MNKPlayer {
 
   // Initialiaze zobristTable with random numbers
   public void fillZobristHashes(){
-    new Thread(() ->{
-      for (int i = 0; i < M; i++) {
-        for (int j = 0; j < N; j++) {
-          zobristTable[i][j][0] = random.nextLong();
-          zobristTable[i][j][1] = random.nextLong();
-        }
+    for (int i = 0; i < M; i++) {
+      for (int j = 0; j < N; j++) {
+        zobristTable[i][j][0] = random.nextLong();
+        zobristTable[i][j][1] = random.nextLong();
       }
-    }).start();
+    }
   }
 
   //keeping track of both the best score and its relative cell.
