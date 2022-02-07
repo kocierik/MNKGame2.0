@@ -228,6 +228,13 @@ public class S implements MNKPlayer {
   }
   //returns one board's value
   public int heuristic() {
+    if(MC.length > 0) {
+      int len = B.getMarkedCells().length-1;
+      MNKCell[] markedCell = B.getMarkedCells();
+      MNKCell c = markedCell[len];
+      System.out.println(c);
+    }
+
     int i = 0, j = 0, value = 0;
     //row
     if(N >= K){
