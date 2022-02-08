@@ -11,8 +11,8 @@ N:=5
 K:=4
 REPS:=2 # game to play
 TIME:=10
-BEST:=S
-OLD:=old
+BEST:=newPlayer
+OLD:=S
 
 .SUFFIXES: .java .class
 .PHONY: build

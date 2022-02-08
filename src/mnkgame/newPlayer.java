@@ -1,7 +1,7 @@
 package mnkgame;
 import java.security.*;
 
-public class S implements MNKPlayer {
+public class newPlayer implements MNKPlayer {
 	private static MNKGameState myWin;
 	private static MNKGameState yourWin;
 	private MNKBoard B;
@@ -29,7 +29,7 @@ public class S implements MNKPlayer {
   private int[][] transposition;
 
   //Default empty constructor
-	public S() {}
+	public newPlayer() {}
 
 	//initializing game class
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
@@ -228,111 +228,51 @@ public class S implements MNKPlayer {
   }
   //returns one board's value
   public int heuristic() {
-    int i = 0, j = 0, value = 0;
-    //row
-    if(N >= K){
-      for (i = 0; i < M; i++) {
-        j = 0;
-        value += depthCell(i,j,0,1,N);
-      }
+    if(B.getMarkedCells().length > 0) {
+      int len = B.getMarkedCells().length-1;
+      MNKCell[] markedCell = B.getMarkedCells();
+      MNKCell c = markedCell[len];
+      //System.out.println(c);
+
+      int res = 0;
+      int rightSide = Math.min(K,N-c.j-1);
+      int leftSide = Math.min(K,c.j);
+      int belowSide = Math.min(K,M-c.i-1);
+      int aboveSide = Math.min(K,c.i);
+      int rightUpSide = Math.min(K,Math.min(rightSide,aboveSide));
+      int leftUpSide = Math.min(K,Math.min(leftSide,aboveSide));
+      int rightDownSide = Math.min(K,Math.min(rightSide,belowSide));
+      int leftDownSide = Math.min(K,Math.min(leftSide,belowSide));
+      //start cell coordinates
+      int i = 0,j = 0;
+      //row evaluation
+      i = c.i;
+      j = c.j - leftSide;
+      // System.out.println(1);
+      // System.out.println(i);
+      // System.out.println(j);
+      res += depthCell(i, j, 0, 1, leftSide+rightSide+1);
+      //column evaluation
+      i = c.i - aboveSide;
+      j = c.j;
+      //System.out.println(2);
+      res += depthCell(i, j, 1, 0, aboveSide+belowSide+1);
+      //diagonal evaluation
+      i = c.i - leftUpSide;
+      j = c.j - leftUpSide;
+      //System.out.println(3);
+      res += depthCell(i, j, 1, 1, leftUpSide+rightDownSide+1);
+      //antidiagonal evaluation
+      i = c.i - rightUpSide;
+      j = c.j + rightUpSide;
+      //System.out.println(4);
+      res += depthCell(i, j, 1, -1, rightUpSide+leftDownSide+1);
+      //this shouldn't happen, but we check it just in case
+      if(res>MAX) return MAX-1; 
+      if(res<MIN) return MIN+1;
+      return res;
     }
-    //column
-    if(M >= K){
-      for (j = 0; j < N; j++) {
-        i = 0;
-        value += depthCell(i,j,1,0,M);
-      }
-    }
-    int maxLen = minMN;
-    int nMaxDiag = Math.abs(M-N)+1;
-    if(maxLen>=K){
-      //diagonal
-      if(M>=N){
-        for (j = 1; j < N; j++) {
-          if(maxLen-j>=K){
-            i = 0;
-            value += depthCell(i,j,1,1,maxLen-j);
-          }
-          else break;
-        }
-        for(i = 0; i < M; i++){
-          if(i<nMaxDiag){
-            j = 0;
-            value += depthCell(i,j,1,1,maxLen);
-          }
-          else if(maxLen-(i+1-nMaxDiag)>=K){
-            j = 0;
-            value += depthCell(i,j,1,1,maxLen-(i+1-nMaxDiag));
-          }
-          else break;
-        }
-      }
-      else{
-        for (j = 0; j < N; j++) {
-          if(j<nMaxDiag){
-            i = 0;
-            value += depthCell(i,j,1,1,maxLen);
-          }
-          else if(maxLen-(j+1-nMaxDiag)>=K){
-            i = 0;
-            value += depthCell(i,j,1,1,maxLen-(j+1-nMaxDiag));
-          }
-          else break;
-        }
-        for(i = 1; i < M; i++){
-          if(maxLen-i>=K){
-            j = 0;
-            value += depthCell(i,j,1,1,maxLen-i);
-          }
-          else break;
-        }
-      }
-      //antidiagonal
-      if(M>=N){
-        for(j = N-2; j >= 0; j--) {
-          if(maxLen-(N-j-1)>=K){
-            i = 0;
-            value += depthCell(i,j,1,-1,maxLen-(N-j-1));
-          }
-          else break;
-        }
-        for(i = 0; i < M; i++){
-          if(i<nMaxDiag){
-            j = N-1;
-            value += depthCell(i,j,1,-1,maxLen);
-          }
-          else if(maxLen-(i+1-nMaxDiag)>=K){
-            j = N-1;
-            value += depthCell(i,j,1,-1,maxLen-(i+1-nMaxDiag));
-          }
-          else break;
-        }
-      }
-      else{
-        for (j = N-1; j >= 0; j--) {
-          if(N-j-1 < nMaxDiag){
-            i = 0;
-            value += depthCell(i,j,1,-1,maxLen);
-          }
-          else if(maxLen-(N-j-nMaxDiag)>=K){
-            i = 0;
-            value += depthCell(i,j,1,-1,maxLen-(N-j-nMaxDiag));
-          }
-          else break;
-        }
-        for(i = 1; i < M; i++){
-          if(maxLen-i>=K){
-            j = N-1;
-            value += depthCell(i,j,1,-1,maxLen-i);
-          }
-          else break;
-        }
-      }
-    }
-    //this shouldn't happen, but we check it just in case
-    if(value>MAX) return MAX-1; 
-    if(value<MIN) return MIN+1;
-    return value;
+    return 0;
   }
   
   private long currentHash;
@@ -445,12 +385,14 @@ public class S implements MNKPlayer {
 
   // Initialiaze zobristTable with random numbers
   public void fillZobristHashes(){
-    for (int i = 0; i < M; i++) {
-      for (int j = 0; j < N; j++) {
-        zobristTable[i][j][0] = random.nextLong();
-        zobristTable[i][j][1] = random.nextLong();
+    new Thread(() ->{
+      for (int i = 0; i < M; i++) {
+        for (int j = 0; j < N; j++) {
+          zobristTable[i][j][0] = random.nextLong();
+          zobristTable[i][j][1] = random.nextLong();
+        }
       }
-    }
+    }).start();
   }
 
   //keeping track of both the best score and its relative cell.
@@ -536,6 +478,6 @@ public class S implements MNKPlayer {
     return bestCell;
   }
   public String playerName() {
-    return "Android";
+    return "newPlayer";
   }
 }
