@@ -1,5 +1,5 @@
 package mnkgame;
-import java.security.*;
+import java.security.SecureRandom;
 
 public class newPlayer implements MNKPlayer {
 	private static MNKGameState myWin;
@@ -289,7 +289,7 @@ public class newPlayer implements MNKPlayer {
   }
   //time limit
   private boolean isTimeRunningOut() {
-    return (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(94.0/100.0);
+    return (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(90.0/100.0);
   }
   
   //returns hashing value index
@@ -385,14 +385,12 @@ public class newPlayer implements MNKPlayer {
 
   // Initialiaze zobristTable with random numbers
   public void fillZobristHashes(){
-    new Thread(() ->{
       for (int i = 0; i < M; i++) {
         for (int j = 0; j < N; j++) {
           zobristTable[i][j][0] = random.nextLong();
           zobristTable[i][j][1] = random.nextLong();
         }
       }
-    }).start();
   }
 
   //keeping track of both the best score and its relative cell.
