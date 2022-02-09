@@ -55,7 +55,6 @@ public class newPlayer implements MNKPlayer {
 		MNKGameState state = B.gameState();
 		if(state == MNKGameState.OPEN){
       value =  heuristic();
-      // System.out.println("valore dell'euristica = " + value);
       return value;
     }
 		else if(state == MNKGameState.DRAW) return 0;
@@ -73,23 +72,23 @@ public class newPlayer implements MNKPlayer {
               res += 30_000_000;
             }
             else{
-              res += 6_000_000;
+              res += 9_000_000;
             }
         }
         else if(consecutive >= K-2){
             if(open) {
-              res += 2_900_000;
+              res += 4_000_000;
             }
             else{
-              res += 1_400_000;
+              res += 1_900_000;
             }
         }
         else if(consecutive >= K-3){
             if(open){
-              res += 600_000;
+              res += 900_000;
             }
             else{
-              res += 200_000;
+              res += 400_000;
             }
         }
         //evaluate non consecutive cells density
@@ -99,6 +98,7 @@ public class newPlayer implements MNKPlayer {
         if(marked>=K-3){
           res+=(marked)*50_000;
         }
+        //marked cells density
         res += ((double)marked/(double)n)*100_000;
       }
     }
@@ -232,7 +232,6 @@ public class newPlayer implements MNKPlayer {
       int len = B.getMarkedCells().length-1;
       MNKCell[] markedCell = B.getMarkedCells();
       MNKCell c = markedCell[len];
-      //System.out.println(c);
 
       int res = 0;
       int rightSide = Math.min(K,N-c.j-1);
@@ -245,28 +244,27 @@ public class newPlayer implements MNKPlayer {
       int leftDownSide = Math.min(K,Math.min(leftSide,belowSide));
       //start cell coordinates
       int i = 0,j = 0;
+
       //row evaluation
       i = c.i;
       j = c.j - leftSide;
-      // System.out.println(1);
-      // System.out.println(i);
-      // System.out.println(j);
       res += depthCell(i, j, 0, 1, leftSide+rightSide+1);
+
       //column evaluation
       i = c.i - aboveSide;
       j = c.j;
-      //System.out.println(2);
       res += depthCell(i, j, 1, 0, aboveSide+belowSide+1);
+
       //diagonal evaluation
       i = c.i - leftUpSide;
       j = c.j - leftUpSide;
-      //System.out.println(3);
       res += depthCell(i, j, 1, 1, leftUpSide+rightDownSide+1);
+
       //antidiagonal evaluation
       i = c.i - rightUpSide;
       j = c.j + rightUpSide;
-      //System.out.println(4);
       res += depthCell(i, j, 1, -1, rightUpSide+leftDownSide+1);
+
       //this shouldn't happen, but we check it just in case
       if(res>MAX) return MAX-1; 
       if(res<MIN) return MIN+1;

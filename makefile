@@ -6,13 +6,13 @@ JVMFLAGS = -cp build
 PKG=mnkgame
 TEST=MNKPlayerTester
 MAIN=$(PKG).MNKGame 
-M:=10
-N:=10
-K:=5
+M:=6
+N:=4
+K:=4
 REPS:=2 # game to play
 TIME:=10
 BEST:=newPlayer
-OLD:=newPlayer
+OLD:=S
 
 .SUFFIXES: .java .class
 .PHONY: build
