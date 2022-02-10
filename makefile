@@ -11,7 +11,7 @@ N:=4
 K:=4
 REPS:=2 # game to play
 TIME:=10
-BEST:=newPlayer
+BEST:=WallE
 OLD:=S
 
 .SUFFIXES: .java .class

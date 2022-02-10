@@ -1,7 +1,7 @@
 package mnkgame;
 import java.security.SecureRandom;
 
-public class newPlayer implements MNKPlayer {
+public class WallE implements MNKPlayer {
 	private static MNKGameState myWin;
 	private static MNKGameState yourWin;
 	private MNKBoard B;
@@ -29,7 +29,7 @@ public class newPlayer implements MNKPlayer {
   private int[][] transposition;
 
   //Default empty constructor
-	public newPlayer() {}
+	public WallE() {}
 
 	//initializing game class
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
@@ -243,7 +243,7 @@ public class newPlayer implements MNKPlayer {
       int rightDownSide = Math.min(K,Math.min(rightSide,belowSide));
       int leftDownSide = Math.min(K,Math.min(leftSide,belowSide));
       //start cell coordinates
-      int i = 0,j = 0;
+      int i,j;
 
       //row evaluation
       i = c.i;
@@ -287,7 +287,7 @@ public class newPlayer implements MNKPlayer {
   }
   //time limit
   private boolean isTimeRunningOut() {
-    return (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(90.0/100.0);
+    return (System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(93.0/100.0);
   }
   
   //returns hashing value index
@@ -474,6 +474,6 @@ public class newPlayer implements MNKPlayer {
     return bestCell;
   }
   public String playerName() {
-    return "newPlayer";
+    return "WALL-E";
   }
 }
