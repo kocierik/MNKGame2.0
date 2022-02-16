@@ -12,7 +12,7 @@ K:=4
 REPS:=2 # game to play
 TIME:=10
 BEST:=WallE
-OLD:=S
+OLD:=RandomPlayer
 
 .SUFFIXES: .java .class
 .PHONY: build
