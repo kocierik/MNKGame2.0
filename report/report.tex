@@ -1,9 +1,12 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage{imakeidx}
 
 \usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{listings}   
+\usepackage{tcolorbox}
+% Include the listings-package
 \lstset{breaklines}
 
 \begin{document}
@@ -20,14 +23,13 @@
          Relazione del progetto per l'insegnamento di Algoritmi e Strutture Dati \\
         
             
-        \vspace{1.5cm}
+        \vspace{1.0cm}
         \vfill
         Erik Koci M. 0000997662 \\ 
-        Paolo Ceroni M. 0000978232
-            
+        Paolo Ceroni M. 0000978232\\
         \vspace{0.8cm}
             
-        \includegraphics[width=0.8\textwidth]{img/unibo.png}
+        
             
         \Large
         Dipartimento di Informatica\\
@@ -155,12 +157,91 @@ function DLS(nodo, goal, profondita){
 
 
     \subsection{Valutazione euristica}
-    \textbf{TODO}\\
-    % TODO 
+    Una funzione \textit{euristica} permette di determinare il \textbf{valore} di una tabella a seconda della possibilità di vittoria. L'implementazione di una valutazione euristica è indispensabile per permettere il giusto funzionamento dell'algoritmo \textbf{Negamax}.\\
+    A livello pratico, non conoscendo il valore esatto delle tabelle, cerchiamo di fare un'approssimazione in modo tale che venga scelta la tabella con \textit{maggiore} probabilità di vittoria.\\
+    Nella nostra implementazione valutiamo ogni riga, colonna, diagonale e antidiagonale passante per l'ultima cella marcata, ma fermandoci a distanza \textbf{K} (o ai limite della tabella) in ogni direzione. Per cui ogni sequenza che andiamo a valutare avrà una lunghezza minore o uguale a \textbf{2K+1}.\\ Per ciascuna sequenza si valutano le sottosequenze \textbf{aperte} e \textbf{semiaperte} dei rispettivi giocatori, dando peso in particolari alle sequenze di lunghezza $K-1$, $K-2$ e $K-3$, assegnando un \textit{punteggio} stabilito dalla funzione \textit{seriesBonus}.\\
+ 
+ 
+     \subsubsection{Pseudocodice heuristic:}
+    \lstset{language=java}
+    \begin{lstlisting}[frame=single]  
+function heuristic() {
+  if(B.getMarkedCells().length > 0) {
+      MNKCell c = lastMarkedCell();
+      int res = 0,i,j;
+      //row evaluation
+      i = c.i;
+      j = c.j - leftSide;
+      res += depthCell(i,j,0,1,leftSide+rightSide+1);
+      
+      //column evaluation
+      i = c.i - aboveSide;
+      j = c.j;
+      res += depthCell(i,j,1,0,aboveSide+belowSide+1);
+      
+      //diagonal evaluation
+      i = c.i - leftUpSide;
+      j = c.j - leftUpSide;
+      res += depthCell(i,j,1,1,leftUpSide+rightDownSide+1);
+      
+      //antidiagonal evaluation
+      i = c.i - rightUpSide;
+      j = c.j + rightUpSide;
+      res += depthCell(i,j,1,1-1, rightUpSide+leftDownSide+1);
+}
+    \end{lstlisting}
+    \newpage
+    \subsubsection{Pseudocodice depthCell:}
+   \lstset{language=java}
+    \begin{lstlisting}[frame=single]   
+function depthCell(i,j, direction ,len) {
+  for(z=0;z<len;z++):
+    if(B.cellState(i+z*direction.i,j+z*directon.j) = P1):
+      value = value + seriesBonus(c1series, maxSeries, marked);
+    endif
+    if(B.cellState(i+z*dir_i,j+z*dir_j) = P2):
+      value = value - seriesBonus(c2series, maxSeries, marked);
+    endif
+  endfor
+}
+    \end{lstlisting}
     
-    Riduzione del tempo di eseguzione nel caso in cui sia presente una mossa vincente per l'AI o per l'avversario, \textbf{evitando} così di eseguire \textbf{l'intero algoritmo} alpha-beta pruning. 
+    \subsubsection{Pseudocodice seriesBonus:}
+    \lstset{language=java}  
+    \begin{lstlisting}[frame=single]
+function seriesBonus(n,consecutive,marked) {
+  res := 0
+  if n greater then K:
+    if consecutive greater then K-3:
+      if consecutive greater then K-1:
+        res := res + 5_000_000;
+      endif
+      else if consecutive greater then K-2:
+        res := res + 500_000;
+      endif
+      else if consecutive >= K-3
+        res := res + 10_000
+      endif
+    endif
+    else
+      if marked greater then K-1:
+        res := res + ((marked)/(n-marked))*100_000;
+      endif
+  endif
+  return res;
+}
 
-    \subsubsection{Pseudocodice markWinCell:}
+    \end{lstlisting}
+ 
+ 
+ 
+ 
+ 
+    
+    
+  
+\newpage
+    \subsubsection{Pseudocodice markMyWinningCell:}
     \lstset{language=java}
     \begin{lstlisting}[frame=single]  
 function markMyWinningCell(MNKBoard B) {
@@ -168,7 +249,10 @@ function markMyWinningCell(MNKBoard B) {
     if(markCell(i,j) == myWin) 
        return cell
 }
-
+    \end{lstlisting}
+    \subsubsection{Pseudocodice markEnemyWinningCell:}
+    \lstset{language=java}
+    \begin{lstlisting}[frame=single]  
 function markEnemyWinningCell(MNKBoard B) {
     markCell(i,j)
     for each freeCell do
@@ -180,15 +264,12 @@ function markEnemyWinningCell(MNKBoard B) {
       else 
          B.unmarkCell()       
 }
-
     \end{lstlisting}
-        
-        \textbf{Costo computazionale:} $\Theta(n)$ dove $n$ indica il numero di \textbf{celle libere} nella board. 
-        
+
         
     
  %----------------------------------------------------------------------
- \newpage
+
      \subsection{Possibili euristiche precedentemente applicate}
     A livello di strategie di implementazione, oltre all'\textbf{euristica} citata precedentemente, sono state implementate anche altri metodi con scarsi risultati:
     
@@ -212,8 +293,6 @@ function removeBadMoves(MNKBoard B) {
 }
     \end{lstlisting}
         
-        \textbf{Costo computazionale:} $O(m \cdot k)$ dove $m$ indica il numero di \textbf{celle marcate} e $k$ indica il numero di \textbf{celle} allineate per \textbf{vincere}.
-        
         \item scegliere una mossa \textbf{vicina} a una cella avversaria nel caso in cui non si riesca a ricavare una mossa "vincente". (in questo modo con configurazioni m,n,k di grandi dimensione abbiamo più \textbf{probabilità} di selezionare una cella vincente. 
         
     \subsubsection{Pseudocodice nearCell}
@@ -233,19 +312,23 @@ function getBestMoves(MNKBoard B) {
 }
     \end{lstlisting}
         
-        \textbf{Costo computazionale:} $\Theta(n)$ dove $n$ indica il numero di \textbf{celle libere} nella board.
-        
+ 
     \end{enumerate}
     
     
     
     \section{Conclusioni}
-    In conclusione gli algoritmi applicati hanno dato un riscontro positivo sull'efficacia del player implementato. Dal punto di vista computazionale è stata data una stima approprità dovuta alla tipologia di algoritmo, poiché non è possibile definire un numero massimo di nodi visitati.
+    La funzione \textit{seriesBonus} usata per l'euristica richiederebbe dei valori particolari per rispecchiare in modo ottimale il valore della tabella. Dopo diversi tentativi abbiamo trovato dei valori che restituiscono un valore soddisfacente.\\
+    Dal punto di vista computazionale è stata data una stima approssimativa dovuta alla tipologia di algoritmo, poiché non è possibile definire un numero massimo di nodi visitati.\\
+    In conclusione gli algoritmi applicati hanno dato un riscontro sufficientemente positivo sull'efficacia del player implementato.
     
     \subsection{Complessità computazionale}
-    La complessità computazionale del metodo \textit{selectCell()} deriva maggiormente dall'algoritmo \textit{negamax} e \textit{iterative deepening}. Negamax rispettivamente ha costo computazionale pari a $O(m^d)$ dove $m$ sono le mosse per giocatore e $d$ indicano la profondità della mossa, mentre iterative deepening ha un costo trascurabile di $O(d)$ dove $d$ indica la profondità della soluzione più vicina alla radice.\\
-    La tabella di trasposizione implementata assieme alla funzione di hashing di Zobriest invece ha un costo costante.\\
-    Un altro fattore importante da osservare è l'euristica implementata, la quale viene chiamata ad ogni iterazione influendo sul costo computazionale, pari a $O(???)$. La complessità totale dunque raggiunge un costo di $O(???)$.
+    La complessità computazionale del metodo \textit{selectCell()} deriva maggiormente dall'algoritmo \textit{Negamax} e \textit{Iterative Deepening}.\\
+    \textit{Negamax} ha costo computazionale pari a $O(m^d)$
+    dove $m$ sono le mosse per giocatore e $d$ indica la profondità della mossa; tuttavia se l'ordinamento è perfetto il numero di posizioni ricercate diventa $O(\sqrt{m^d})$.\\
+    \textit{Iterative Deepening} ha un costo trascurabile di $O(d)$ dove $d$ indica la profondità della soluzione più vicina alla radice.\\
+    Invece, la tabella di trasposizione implementata assieme alla funzione di hashing di Zobriest ha un costo costante $O(1)$.\\
+    Un altro fattore importante da osservare è l'euristica che ha costo computazionale pari a $O((2K+1)\times 4)=O(K)$ dove $K$ è il numero di celle da allineare.
 
 
 \subsection{Alternative strategie progettuali}
@@ -284,5 +367,3 @@ https://en.wikipedia.org/wiki/Negamax
     https://en.wikipedia.org/wiki/Quiescence\_search
 \end{thebibliography}
 \end{document}
-
-
